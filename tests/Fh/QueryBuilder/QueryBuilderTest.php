@@ -140,7 +140,7 @@ class QueryBuilderTest extends QueryBuilderTestBase {
 
         // Verify SQL output
         $strSql = $queryBuilder->toSql();
-        $strExpected = 'select * from "ChildTable" where "ChildTable"."deleted_at" is null and "ChildTable"."TestId" = ? and "ChildTable"."TestId" is not null and "Caption" is null and "OriginalId" is not null and "FirstName" LIKE ? and "TestId" <= ? and "IncludeInPrint" = ?';
+        $strExpected = 'select * from "ChildTable" where "ChildTable"."deleted_at" is null and "ChildTable"."TestId" = ? and "ChildTable"."TestId" is not null and "Caption" is null and "OriginalId" is not null and "FirstName" LIKE ? and "TestId" < ? and "IncludeInPrint" = ?';
         $this->assertEquals($strExpected,$strSql);
 
         // Verify bindings

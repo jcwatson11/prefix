@@ -75,8 +75,10 @@ class QueryBuilder {
             ,'orlike'      => new BuilderClause('orlike','orWhere','LIKE',function(&$value) {
                 $value = "%$value%";
             })
-            ,'greaterthan' => new BuilderClause('greaterthan','where','>=')
-            ,'lessthan'    => new BuilderClause('lessthan','where','<=')
+            ,'greaterthan' => new BuilderClause('greaterthan','where','>')
+            ,'lessthan'    => new BuilderClause('lessthan','where','<')
+            ,'greaterthanorequalto' => new BuilderClause('greaterthan','where','>=')
+            ,'lessthanorequalto'    => new BuilderClause('lessthan','where','<=')
         ];
     }
 
