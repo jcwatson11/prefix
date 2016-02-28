@@ -54,7 +54,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'isnullFirstName');
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `FirstName` is null';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "FirstName" is null';
         $this->assertEquals($strExpected,$strSql);
     }
 
@@ -65,7 +65,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'isnotnullFirstName');
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `FirstName` is not null';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "FirstName" is not null';
         $this->assertEquals($strExpected,$strSql);
     }
 
@@ -76,7 +76,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'orwhereFirstName','Jon');
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null or `FirstName` = ?';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null or "FirstName" = ?';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $builder->getBindings();
@@ -91,7 +91,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'whereFirstName','Jon');
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `FirstName` = ?';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "FirstName" = ?';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $builder->getBindings();
@@ -106,7 +106,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'orderbyFirstName');
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null order by `FirstName` asc';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null order by "FirstName" asc';
         $this->assertEquals($strExpected,$strSql);
     }
 
@@ -117,7 +117,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'groupbyFirstName');
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null group by `FirstName`';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null group by "FirstName"';
         $this->assertEquals($strExpected,$strSql);
     }
 
@@ -128,7 +128,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'betweenLetterId',[5,7]);
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `LetterId` between ? and ?';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "LetterId" between ? and ?';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $builder->getBindings();
@@ -143,7 +143,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'notinarrayLetterId',[5,7]);
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `LetterId` not in (?, ?)';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "LetterId" not in (?, ?)';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $builder->getBindings();
@@ -158,7 +158,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'inarrayLetterId',[5,7]);
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `LetterId` in (?, ?)';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "LetterId" in (?, ?)';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $builder->getBindings();
@@ -175,7 +175,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'likeFirstName','Jon');
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `FirstName` LIKE ?';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "FirstName" LIKE ?';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $builder->getBindings();
@@ -192,7 +192,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'orlikeFirstName','Jon');
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null or `FirstName` LIKE ?';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null or "FirstName" LIKE ?';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $builder->getBindings();
@@ -207,7 +207,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'greaterthanLetterId',9);
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `LetterId` >= ?';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "LetterId" >= ?';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $builder->getBindings();
@@ -222,7 +222,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'lessthanLetterId',9);
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `LetterId` <= ?';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "LetterId" <= ?';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $builder->getBindings();
@@ -237,7 +237,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processFilter($builder,'filterByStatus',1);
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `StatusId` = ?';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "StatusId" = ?';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $builder->getBindings();
@@ -252,7 +252,7 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processFilter($builder,'scopeByStatus',1);
         $strSql = $builder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `StatusId` = ?';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "StatusId" = ?';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $builder->getBindings();

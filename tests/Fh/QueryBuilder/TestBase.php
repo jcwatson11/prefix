@@ -3,20 +3,23 @@
 namespace Fh\QueryBuilder;
 
 use Orchestra\Testbench\TestCase;
-use \Mockery as m;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Artisan;
 
 class TestBase extends TestCase {
 
-	static $pdo = null;
+    public function setUp()
+    {
+        parent::setUp();
+        Artisan::call('migrate',[
+        	'--path' => __DIR__
+        ]);
+    }
 
 	public function tearDown()
 	{
-		parent::tearDown();
+		Artisan::call('migrate:reset');
 		\Mockery::close();
+		parent::tearDown();
 	}
 
 	protected function getApplicationProviders($app)
@@ -37,21 +40,20 @@ class TestBase extends TestCase {
 		// reset base path to point to our package's src directory
 		$app['path.base'] = __DIR__ . '/../../../src';
 
-		$app['config']->set('database.default', 'enterprisedb');
-		$app['config']->set('database.connections.enterprisedb', array(
-			'driver'    => getenv('ENTERPRISE_DRIVER'),
-			'host'      => getenv('ENTERPRISE_HOST'),
-			'database'  => getenv('ENTERPRISE_DBNAME'),
-			'username'  => getenv('ENTERPRISE_USER'),
-			'password'  => getenv('ENTERPRISE_PASS'),
-			'charset'   => getenv('ENTERPRISE_CHARSET'),
-			'collation' => getenv('ENTERPRISE_COLLATION'),
-			'prefix'    => getenv('ENTERPRISE_PREFIX'),
+		$app['config']->set('database.default', 'sqlite_testing');
+		$app['config']->set('database.connections.sqlite_testing', array(
+			'driver'    => 'sqlite',
+			'database'  => ':memory:',
+			'prefix'    => ''
 		));
 		$app['config']->set('database.log', true);
-		$app['config']->set('fh-api-query-builder.limit', 10);
-		$app['config']->set('fh-api-query-builder.baseuri', '/api/v1/');
-		// $this->logListenToDbQueries();
+		$app['config']->set('fh-api-query-builder.defaultLimit', 10);
+		$app['config']->set('fh-api-query-builder.baseUri', '/api/v1/');
+		$app['config']->set('fh-api-query-builder.modelNamespace', 'Fh\QueryBuilder');
+		$app['config']->set('fh-api-query-builder.pagingStyle', 'limit/offset');
+		$app['config']->set('fh-api-query-builder.offsetParameterName', 'offset');
+		$app['config']->set('fh-api-query-builder.limitParameterName', 'limit');
+		$app['config']->set('fh-api-query-builder.pageParameterName', 'page');
 	}
 
 }

@@ -12,7 +12,6 @@ class QueryParserTest extends QueryBuilderTestBase {
         $strTestUri = '/api/v1/letters';
         $queryParser = $this->createQueryParser($strTestUri);
         $this->assertEquals('/api/v1/',$queryParser->strUriBase);
-        $this->assertEquals(10,$queryParser->limit);
     }
 
     public function test_it_can_get_stripped_segments() {
@@ -62,7 +61,8 @@ class QueryParserTest extends QueryBuilderTestBase {
         $aExpected = [10,2];
         $this->assertEquals($aExpected,$aFormatted);
     }
-    public function test_it_can_resolve_a_parent_relations_model_class_name() {
+
+    public function test_it_can_resolve_a_parent_relations_model_route_name() {
         // Simple non-compound URI
         $strTestUri = '/api/v1/letters/';
         $queryParser = $this->createQueryParser($strTestUri);
@@ -82,6 +82,52 @@ class QueryParserTest extends QueryBuilderTestBase {
         $queryParser = $this->createQueryParser($strTestUri);
         $strRelation = $queryParser->getParentRouteName();
         $expected = 'letters.photos';
+        $this->assertEquals($expected,$strRelation);
+    }
+
+    public function test_it_can_resolve_a_parent_relations_model_class_name() {
+        // Simple non-compound URI
+        $strTestUri = '/api/v1/letters/';
+        $queryParser = $this->createQueryParser($strTestUri);
+        $strRelation = $queryParser->getModelName();
+        $expected = 'TestModel';
+        $this->assertEquals($expected,$strRelation);
+
+        // Compound URI
+        $strTestUri = '/api/v1/letters/10/photos';
+        $queryParser = $this->createQueryParser($strTestUri);
+        $strRelation = $queryParser->getModelName();
+        $expected = 'TestModel';
+        $this->assertEquals($expected,$strRelation);
+
+        // Double-Compound URI
+        $strTestUri = '/api/v1/letters/10/photos/4/original';
+        $queryParser = $this->createQueryParser($strTestUri);
+        $strRelation = $queryParser->getModelName();
+        $expected = 'TestChildModel';
+        $this->assertEquals($expected,$strRelation);
+    }
+
+    public function test_it_can_resolve_a_relations_name() {
+        // Simple non-compound URI
+        $strTestUri = '/api/v1/letters/';
+        $queryParser = $this->createQueryParser($strTestUri);
+        $strRelation = $queryParser->getRelationName();
+        $expected = false;
+        $this->assertEquals($expected,$strRelation);
+
+        // Compound URI
+        $strTestUri = '/api/v1/letters/10/photos';
+        $queryParser = $this->createQueryParser($strTestUri);
+        $strRelation = $queryParser->getRelationName();
+        $expected = 'photos';
+        $this->assertEquals($expected,$strRelation);
+
+        // Double-Compound URI
+        $strTestUri = '/api/v1/letters/10/photos/4/original';
+        $queryParser = $this->createQueryParser($strTestUri);
+        $strRelation = $queryParser->getRelationName();
+        $expected = 'original';
         $this->assertEquals($expected,$strRelation);
     }
 

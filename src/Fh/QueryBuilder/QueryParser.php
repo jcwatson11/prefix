@@ -15,12 +15,6 @@ class QueryParser {
     // Base URI to strip out to begin processing
     public $strUriBase;
 
-    // Number of records to return per page
-    public $limit;
-
-    // Current page number
-    protected $page;
-
     /**
      * QueryParser constructor
      * @param array   $routeToModelMap array of route.name => Model.relation pairs
@@ -29,9 +23,49 @@ class QueryParser {
     public function __construct(array $routeToModelMap, Request $request) {
         $this->routeMap   = $routeToModelMap;
         $this->request    = $request;
-        $this->strUriBase = config('fh-api-query-builder.baseuri');
-        $this->limit      = config('fh-api-query-builder.limit');
-        $this->page       = 1;
+        $this->strUriBase = config('fh-api-query-builder.baseUri');
+    }
+
+    /**
+     * Returns the limit value from the query string, or the default
+     * page limit if none was provided.
+     * @return int page limit
+     */
+    public function getLimit() {
+        $name  = config('fh-api-query-builder.limitParameterName');
+        $limit = $this->request->get($name);
+        if(!$limit) {
+            $limit = config('fh-api-query-builder.defaultLimit');
+        }
+        return $limit;
+    }
+
+    /**
+     * Returns the record offset to start at for use with limit/offset
+     * based paging, or 0 if none was provided.
+     * @return int offset
+     */
+    public function getOffset() {
+        $name   = config('fh-api-query-builder.offsetParameterName');
+        $offset = $this->request->get($name);
+        if(!$offset) {
+            $offset = 0;
+        }
+        return $offset;
+    }
+
+    /**
+     * Returns the current page number according to the query string,
+     * or 1 if none was provided.
+     * @return int current page
+     */
+    public function getPage() {
+        $name  = config('fh-api-query-builder.pageParameterName');
+        $page  = $this->request->get($name);
+        if(!$page) {
+            $page = 1;
+        }
+        return $page;
     }
 
     /**
@@ -87,6 +121,39 @@ class QueryParser {
     }
 
     /**
+     * Returns the model name without any relations from the
+     * route to model map provided during construction.
+     * @return string model class name
+     */
+    public function getModelName() {
+        $strModelRelationName = $this->getModelRelationName();
+        $aParts = explode('.',$strModelRelationName);
+        return $aParts[0];
+    }
+
+    /**
+     * Returns the name of the relation on the model that results
+     * are limited to.
+     * @return string relation name from parent model
+     */
+    public function getRelationName() {
+        $strModelRelationName = $this->getModelRelationName();
+        $aParts = explode('.',$strModelRelationName);
+        if(count($aParts) < 2) return false;
+        return $aParts[1];
+    }
+
+    /**
+     * Answers the question of whether the requested resource path
+     * indicates a parent child relationship. Returns true if it does,
+     * false otherwise.
+     * @return boolean
+     */
+    public function hasParent() {
+        return ($this->getParentRouteName()) ? true:false;
+    }
+
+    /**
      * Returns the route name of the parent object
      * @return string route name of parent
      */
@@ -98,12 +165,20 @@ class QueryParser {
         return implode('.',$aNames);
     }
 
+    /**
+     * Returns the base name of the parent route.
+     * @return string name of parent route
+     */
     public function getParentRouteBaseName() {
         $strParentRouteName = $this->getParentRouteName();
         $aSegments = explode('.',$strParentRouteName);
         return array_pop($aSegments);
     }
 
+    /**
+     * Returns the primary key number of the parent that was requested
+     * @return string id of parent
+     */
     public function getParentId() {
         $strRouteName = $this->getRouteName();
         $aRouteNames = explode('.',$strRouteName);

@@ -7,35 +7,43 @@ use Fh\QueryBuilder\QueryBuilder;
 
 class QueryBuilderTest extends QueryBuilderTestBase {
 
+    public function test_it_loads_default_values_from_the_config_file() {
+        // Simple non-compound URI
+        $strTestUri = '/api/v1/letters';
+        $queryParser = $this->createQueryBuilder($strTestUri);
+        $this->assertEquals('Fh\QueryBuilder',$queryParser->strModelNamespace);
+        $this->assertEquals('limit/offset',$queryParser->pagingStyle);
+    }
+
     public function test_it_can_create_a_simple_sql_statement() {
         $strTestUri = '/api/v1/letters';
 
         $queryBuilder = $this->createQueryBuilder($strTestUri);
         $queryBuilder->build();
         $strSql = $queryBuilder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null';
         $this->assertEquals($strExpected,$strSql);
     }
 
     public function test_it_can_filter_results_by_parent_relation() {
         $strTestUri = '/api/v1/letters/23/photos';
         $queryBuilder = $this->createQueryBuilder($strTestUri);
-        $queryBuilder->setModelCreationCallback(function($strClassPath) {
-            $letter = $this->getMockTestModel(23);
-            $mockBuilder = m::mock('stdClass')
-                     ->shouldReceive('first')
-                     ->andReturn($letter)
-                     ->getMock();
-            return m::mock("{$strClassPath}[where]")
-                     ->shouldReceive('where')
-                     ->with('TestId','=',23)
-                     ->andReturn($mockBuilder)
-                     ->getMock();
-        });
+        $modelInstance = $this->getMockTestModel(23);
+        $mockBuilder = m::mock('stdClass')
+                 ->shouldReceive('first')
+                 ->andReturn($modelInstance)
+                 ->getMock();
+        $mockModel = m::mock('Fh\QueryBuilder\TestModel[where]')
+                 ->shouldReceive('where')
+                 ->with('TestId','=',23)
+                 ->andReturn($mockBuilder)
+                 ->getMock();
+
+        $queryBuilder->setModel($mockModel);
 
         $queryBuilder->filterByParentRelation();
         $strSql = $queryBuilder->toSql();
-        $strExpected = 'select * from `ChildTable` where `ChildTable`.`deleted_at` is null and `ChildTable`.`TestId` = ? and `ChildTable`.`TestId` is not null';
+        $strExpected = 'select * from "ChildTable" where "ChildTable"."deleted_at" is null and "ChildTable"."TestId" = ? and "ChildTable"."TestId" is not null';
         $this->assertEquals($strExpected,$strSql);
         $aBindings = $queryBuilder->getBindings();
         $aExpectedBindings = [23];
@@ -51,7 +59,7 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $eagerLoads = $queryBuilder->getBuilder()->getEagerLoads();
         $this->assertEquals(['photos'],array_keys($eagerLoads));
         $strSql = $queryBuilder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null';
         $this->assertEquals($strExpected,$strSql);
 
         // Multiple wheres
@@ -62,7 +70,7 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $eagerLoads = $queryBuilder->getBuilder()->getEagerLoads();
         $this->assertEquals(['photos','status'],array_keys($eagerLoads));
         $strSql = $queryBuilder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null';
         $this->assertEquals($strExpected,$strSql);
     }
 
@@ -72,7 +80,7 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $queryBuilder = $this->createQueryBuilder($strTestUri);
         $queryBuilder->setWheres();
         $strSql = $queryBuilder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `LetterId` between ? and ? and `FirstName` = ?';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "LetterId" between ? and ? and "FirstName" = ?';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $queryBuilder->getBindings();
@@ -89,7 +97,7 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $this->assertEquals(['translations'],array_keys($eagerLoads));
 
         $strSql = $queryBuilder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null';
         $this->assertEquals($strExpected,$strSql);
     }
 
@@ -101,7 +109,7 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $countBuilder = $queryBuilder->getCountBuilder();
 
         $strSql = $queryBuilder->toSql();
-        $strExpected = 'select * from `Table` where `Table`.`deleted_at` is null and `FirstName` LIKE ?';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "FirstName" LIKE ?';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $queryBuilder->getBindings();
@@ -112,18 +120,18 @@ class QueryBuilderTest extends QueryBuilderTestBase {
     public function test_it_can_build_all_things_at_once() {
         $strTestUri = '/api/v1/letters/23/photos?with[]=translations&with[]=original&isnullCaption&isnotnullOriginalId&likeFirstName=Jon&filterAppropriateForPrint&lessthanTestId=2';
         $queryBuilder = $this->createQueryBuilder($strTestUri);
-        $queryBuilder->setModelCreationCallback(function($strClassPath) {
-            $letter = $this->getMockTestModel(23);
-            $mockBuilder = m::mock('stdClass')
-                     ->shouldReceive('first')
-                     ->andReturn($letter)
-                     ->getMock();
-            return m::mock("{$strClassPath}[where]")
-                     ->shouldReceive('where')
-                     ->with('TestId','=',23)
-                     ->andReturn($mockBuilder)
-                     ->getMock();
-        });
+        $modelInstance = $this->getMockTestModel(23);
+        $mockBuilder = m::mock('stdClass')
+                 ->shouldReceive('first')
+                 ->andReturn($modelInstance)
+                 ->getMock();
+        $mockModel = m::mock('Fh\QueryBuilder\TestModel[where]')
+                 ->shouldReceive('where')
+                 ->with('TestId','=',23)
+                 ->andReturn($mockBuilder)
+                 ->getMock();
+
+        $queryBuilder->setModel($mockModel);
         $queryBuilder->build();
 
         // Verify eager loaded relations requested by with[]
@@ -132,7 +140,7 @@ class QueryBuilderTest extends QueryBuilderTestBase {
 
         // Verify SQL output
         $strSql = $queryBuilder->toSql();
-        $strExpected = 'select * from `ChildTable` where `ChildTable`.`deleted_at` is null and `ChildTable`.`TestId` = ? and `ChildTable`.`TestId` is not null and `Caption` is null and `OriginalId` is not null and `FirstName` LIKE ? and `TestId` <= ? and `IncludeInPrint` = ?';
+        $strExpected = 'select * from "ChildTable" where "ChildTable"."deleted_at" is null and "ChildTable"."TestId" = ? and "ChildTable"."TestId" is not null and "Caption" is null and "OriginalId" is not null and "FirstName" LIKE ? and "TestId" <= ? and "IncludeInPrint" = ?';
         $this->assertEquals($strExpected,$strSql);
 
         // Verify bindings
@@ -145,4 +153,69 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         ];
         $this->assertEquals($aExpectedBindings,$aBindings);
     }
+
+    public function test_it_can_paginate_results_using_limit_offset_default_settings() {
+        $strTestUri = '/api/v1/letters';
+        $queryBuilder = $this->createQueryBuilder($strTestUri);
+        $secondMockBuilder = m::mock('stdClass')
+                 ->shouldReceive('take')
+                 ->with(10)
+                 ->andReturn('')
+                 ->getMock();
+        $mockBuilder = m::mock('stdClass')
+                 ->shouldReceive('skip')
+                 ->with(0)
+                 ->andReturn($secondMockBuilder)
+                 ->getMock();
+
+        $queryBuilder->setBuilder($mockBuilder);
+        $queryBuilder->paginate();
+    }
+
+    public function test_it_can_paginate_results_using_limit_offset_with_parameters() {
+        $strTestUri = '/api/v1/letters?limit=20&offset=40';
+        $queryBuilder = $this->createQueryBuilder($strTestUri);
+        $secondMockBuilder = m::mock('stdClass')
+                 ->shouldReceive('take')
+                 ->with(20)
+                 ->andReturn('')
+                 ->getMock();
+        $mockBuilder = m::mock('stdClass')
+                 ->shouldReceive('skip')
+                 ->with(40)
+                 ->andReturn($secondMockBuilder)
+                 ->getMock();
+
+        $queryBuilder->setBuilder($mockBuilder);
+        $queryBuilder->paginate();
+    }
+
+    public function test_it_can_paginate_results_using_page_default_settings() {
+        $strTestUri = '/api/v1/letters';
+        $queryBuilder = $this->createQueryBuilder($strTestUri);
+        $queryBuilder->setPagingStyle('page=');
+        $mockBuilder = m::mock('stdClass')
+                 ->shouldReceive('paginate')
+                 ->with(10,null,null,1)
+                 ->andReturn('')
+                 ->getMock();
+
+        $queryBuilder->setBuilder($mockBuilder);
+        $queryBuilder->paginate();
+    }
+
+    public function test_it_can_paginate_results_using_page_with_parameters() {
+        $strTestUri = '/api/v1/letters?page=2&limit=40';
+        $queryBuilder = $this->createQueryBuilder($strTestUri);
+        $queryBuilder->setPagingStyle('page=');
+        $mockBuilder = m::mock('stdClass')
+                 ->shouldReceive('paginate')
+                 ->with(40,null,null,2)
+                 ->andReturn('')
+                 ->getMock();
+
+        $queryBuilder->setBuilder($mockBuilder);
+        $queryBuilder->paginate();
+    }
+
 }

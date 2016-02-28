@@ -138,7 +138,7 @@ abstract class QueryBuilderTestBase extends TestBase {
         $modelMap = $routeMap->getRouteToModelMap();
         $model = $this->getMockModel();
         $request = $this->createRequest($strUri,$aPost,$body,$files,$cookies);
-        $queryBuilder = new QueryBuilder($modelMap, $model, $request);
+        $queryBuilder = new QueryBuilder($modelMap, $request);
         return $queryBuilder;
     }
 

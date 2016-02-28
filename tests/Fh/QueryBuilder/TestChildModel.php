@@ -4,8 +4,9 @@ namespace Fh\QueryBuilder;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
 
-class TestRelationModel extends EloquentMapperBase implements MapperInterface
+class TestRelationModel extends Model
 {
     use SoftDeletes;
 

@@ -16,9 +16,13 @@ class QueryBuilder {
     protected $modelCreationCallback;
 
     // Default namespace for model names found in the routeMap
-    protected $strModelNamespace;
+    public $strModelNamespace;
 
+    // Array of abstracted clause types that the builder supports.
     protected $builderClauses = [];
+
+    // Sets the paging style: either 'page=' or 'limit/offset'
+    public $pagingStyle;
 
     /**
      * Constructs the query builder
@@ -28,16 +32,25 @@ class QueryBuilder {
      * @param Model   $model   Illuminate\Database\Eloquent\Model
      * @param Request $request Illuminate\Http\Request
      */
-    public function __construct(array $routeToModelMap, Model $model, Request $request) {
-        $this->parser = new QueryParser($routeToModelMap,$request);
-        $this->model = $model;
-        $this->builder = $this->model->newQuery();
-        // This is necessary so models can be mocked.
-        $this->setModelCreationCallback(
-            $this->getDefaultModelCreationCallback()
-        );
+    public function __construct(array $routeToModelMap, Request $request) {
+        $this->parser            = new QueryParser($routeToModelMap,$request);
+        $this->strModelNamespace = config('fh-api-query-builder.modelNamespace');
+        $this->pagingStyle       = config('fh-api-query-builder.pagingStyle');
         $this->initializeWherePrefixes();
-        $this->strModelNamespace = config('fh-api-query-builder.modelnamespace');
+        $this->model             = $this->resolveModel();
+        $this->builder           = $this->model->newQuery();
+    }
+
+    /**
+     * Resolves the model from the routeToModelMap provided
+     * in the constructor.
+     * @return void
+     */
+    public function resolveModel() {
+        $strModelName = $this->parser->getModelName();
+
+        $strClassPath = $this->strModelNamespace . '\\' . $strModelName;
+        return $this->createModel($strClassPath);
     }
 
     /**
@@ -73,7 +86,6 @@ class QueryBuilder {
      */
     public function build() {
 
-        // Restrict access to child objects by natural relation.
         $this->filterByParentRelation()
              ->includeRelations()
              ->setWheres()
@@ -111,17 +123,11 @@ class QueryBuilder {
      * @return QueryBuilder this
      */
     public function filterByParentRelation() {
-        $aParts = explode('.',$this->parser->getModelRelationName());
-
-        // No need to limit by parent relation if there is no parent.
-        if(count($aParts) == 1) return $this;
-
-        list($strModelName, $strRelationName) = $aParts;
-        $strClassPath = $this->strModelNamespace . '\\' . $strModelName;
-        $model = $this->createModel($strClassPath);
-        $strPrimaryKey = $model->getKeyName();
+        if(!$this->parser->hasParent()) return $this;
+        $strPrimaryKey = $this->model->getKeyName();
         $strKeyValue   = $this->parser->getParentId();
-        $builder = $model->where($strPrimaryKey,'=',intval($strKeyValue))->first();
+        $strRelationName = $this->parser->getRelationName();
+        $builder = $this->model->where($strPrimaryKey,'=',intval($strKeyValue))->first();
         $this->builder = $builder->$strRelationName();
         return $this;
     }
@@ -230,36 +236,15 @@ class QueryBuilder {
      * @return Illuminate\Database\Eloquent\Model
      */
     public function createModel($strClassPath) {
-        $fn = $this->modelCreationCallback;
-        return $fn($strClassPath);
+        return new $strClassPath();
     }
 
     /**
-     * Sets the model creator callback function.
-     * @param function $function
+     * Allows you to set the model so it can be mocked.
+     * @param Illuminate\Database\Eloquent\Model $model
      */
-    public function setModelCreationCallback($function) {
-        $this->modelCreationCallback = $function;
-    }
-
-    /**
-     * Returns the default model creation callback.
-     * @return function
-     */
-    public function getDefaultModelCreationCallback() {
-        return function($strClassPath) {
-            return new $strClassPath();
-        };
-    }
-
-    /**
-     * Executes the query and returns
-     * a result set.
-     * @param  int $iPerPage
-     * @return Illuminate\Database\Eloquent\Collection
-     */
-    public function paginate($iPerPage = null) {
-        return $this->builder->paginate($iPerPage);
+    public function setModel($model) {
+        $this->model = $model;
     }
 
     /**
@@ -288,11 +273,50 @@ class QueryBuilder {
     }
 
     /**
+     * Sets the builder object so it can be mocked
+     * @param Illuminate\Database\Eloquent\Builder $builder
+     */
+    public function setBuilder($builder) {
+        $this->builder = $builder;
+    }
+
+    /**
+     * Sets the paging style so it can be mocked
+     * @param string $style either 'page=' or 'limit/offset'
+     */
+    public function setPagingStyle($style) {
+        $this->pagingStyle = $style;
+    }
+
+    /**
      * Setter for the total record count property
      * @param int $count
      */
     public function setCount($count) {
         $this->count = $count;
+    }
+
+    /**
+     * Return results via pagination.
+     * Supports any style of pagination you want, including:
+     * - laravel default ?page=1 from query string
+     * - limit / offset pagination using ?limit=10&offset=30
+     * - custom query string names for any of the above parameters
+     * @param  int $limit
+     * @return Illuminate\Database\Eloquent\Collection
+     */
+    public function paginate($limit = null) {
+        if(!$limit)
+            $limit = $this->parser->getLimit();
+        $page = $this->parser->getPage();
+        // Page by paging style
+        if($this->pagingStyle == 'page=') {
+            return $this->builder->paginate($limit,null,null,$page);
+        } else {
+            // using limit / offset for paging
+            $start = $this->parser->getOffset();
+            $this->builder->skip($start)->take($limit);
+        }
     }
 
 }
