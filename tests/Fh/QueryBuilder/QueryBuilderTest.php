@@ -21,21 +21,21 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $strTestUri = '/api/v1/letters/23/photos';
         $queryBuilder = $this->createQueryBuilder($strTestUri);
         $queryBuilder->setModelCreationCallback(function($strClassPath) {
-            $letter = $this->getMockLetter(23);
+            $letter = $this->getMockTestModel(23);
             $mockBuilder = m::mock('stdClass')
                      ->shouldReceive('first')
                      ->andReturn($letter)
                      ->getMock();
             return m::mock("{$strClassPath}[where]")
                      ->shouldReceive('where')
-                     ->with('LetterId','=',23)
+                     ->with('TestId','=',23)
                      ->andReturn($mockBuilder)
                      ->getMock();
         });
 
         $queryBuilder->filterByParentRelation();
         $strSql = $queryBuilder->toSql();
-        $strExpected = 'select * from `LetterPhoto` where `LetterPhoto`.`deleted_at` is null and `LetterPhoto`.`LetterId` = ? and `LetterPhoto`.`LetterId` is not null';
+        $strExpected = 'select * from `ChildTable` where `ChildTable`.`deleted_at` is null and `ChildTable`.`TestId` = ? and `ChildTable`.`TestId` is not null';
         $this->assertEquals($strExpected,$strSql);
         $aBindings = $queryBuilder->getBindings();
         $aExpectedBindings = [23];
@@ -107,5 +107,42 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $aBindings = $queryBuilder->getBindings();
         $aExpected = ['%Jon%'];
         $this->assertEquals($aExpected,$aBindings);
+    }
+
+    public function test_it_can_build_all_things_at_once() {
+        $strTestUri = '/api/v1/letters/23/photos?with[]=translations&with[]=original&isnullCaption&isnotnullOriginalId&likeFirstName=Jon&filterAppropriateForPrint&lessthanTestId=2';
+        $queryBuilder = $this->createQueryBuilder($strTestUri);
+        $queryBuilder->setModelCreationCallback(function($strClassPath) {
+            $letter = $this->getMockTestModel(23);
+            $mockBuilder = m::mock('stdClass')
+                     ->shouldReceive('first')
+                     ->andReturn($letter)
+                     ->getMock();
+            return m::mock("{$strClassPath}[where]")
+                     ->shouldReceive('where')
+                     ->with('TestId','=',23)
+                     ->andReturn($mockBuilder)
+                     ->getMock();
+        });
+        $queryBuilder->build();
+
+        // Verify eager loaded relations requested by with[]
+        $eagerLoads = $queryBuilder->getBuilder()->getEagerLoads();
+        $this->assertEquals(['translations','original'],array_keys($eagerLoads));
+
+        // Verify SQL output
+        $strSql = $queryBuilder->toSql();
+        $strExpected = 'select * from `ChildTable` where `ChildTable`.`deleted_at` is null and `ChildTable`.`TestId` = ? and `ChildTable`.`TestId` is not null and `Caption` is null and `OriginalId` is not null and `FirstName` LIKE ? and `TestId` <= ? and `IncludeInPrint` = ?';
+        $this->assertEquals($strExpected,$strSql);
+
+        // Verify bindings
+        $aBindings = $queryBuilder->getBindings();
+        $aExpectedBindings = [
+             23
+            ,'%Jon%'
+            ,'2'
+            ,true
+        ];
+        $this->assertEquals($aExpectedBindings,$aBindings);
     }
 }

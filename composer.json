@@ -2,8 +2,7 @@
     "name": "fh/querybuilder",
     "description": "Laravel based translation between API Standard URI's and a builder object.",
     "require": {
-        "laravel/framework": "5.1.*",
-        "fh/gbo":            "dev-3.1-Letters"
+        "laravel/framework": "5.1.*"
     },
     "require-dev": {
         "orchestra/testbench"       : "3.1.*",
@@ -26,56 +25,6 @@
         {
             "name": "Jon Watson",
             "email": "jwatson@fh.org"
-        }
-    ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:fhcode/fh-entrust.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:fhcode/fh-gbo.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:fhcode/fh-jsonfactory.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:fhcode/fh-deployment.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:fhcode/fh-auth.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:fhcode/fh-lang.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:fhcode/fh-pagemanager.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:fhcode/fh-migration-sync.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:fhcode/fh-migrations.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:fhcode/fh-revisionable.git"
-        },
-        {
-            "type": "vcs",
-             "url": "git@bitbucket.org:fhcode/fh-opauth-google.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@bitbucket.org:fhcode/fh-jose.git"
         }
     ],
     "minimum-stability": "dev"

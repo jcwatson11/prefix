@@ -13,7 +13,13 @@ class QueryParser {
     protected $routeMap;
 
     // Base URI to strip out to begin processing
-    protected $strUriBase = '/api/v1/';
+    public $strUriBase;
+
+    // Number of records to return per page
+    public $limit;
+
+    // Current page number
+    protected $page;
 
     /**
      * QueryParser constructor
@@ -21,8 +27,11 @@ class QueryParser {
      * @param Illuminate\Http\Request $request
      */
     public function __construct(array $routeToModelMap, Request $request) {
-        $this->routeMap = $routeToModelMap;
-        $this->request = $request;
+        $this->routeMap   = $routeToModelMap;
+        $this->request    = $request;
+        $this->strUriBase = config('fh-api-query-builder.baseuri');
+        $this->limit      = config('fh-api-query-builder.limit');
+        $this->page       = 1;
     }
 
     /**

@@ -16,7 +16,7 @@ class QueryBuilder {
     protected $modelCreationCallback;
 
     // Default namespace for model names found in the routeMap
-    protected $strModelNamespace = 'Fh\Data\Mapper\US';
+    protected $strModelNamespace;
 
     protected $builderClauses = [];
 
@@ -37,6 +37,7 @@ class QueryBuilder {
             $this->getDefaultModelCreationCallback()
         );
         $this->initializeWherePrefixes();
+        $this->strModelNamespace = config('fh-api-query-builder.modelnamespace');
     }
 
     /**
@@ -72,21 +73,13 @@ class QueryBuilder {
      */
     public function build() {
 
-/*
         // Restrict access to child objects by natural relation.
-        $this->filterByParentRelation();
-
-        // Set with relations
-        $this->setRelations();
-
-        // Process where clauses, filters and scopes.
-        $this->setWheres();
-        $this->setFilters();
-        $this->setScopes();
-
-        // Get translations
-        $this->setTranslations();
-*/
+        $this->filterByParentRelation()
+             ->includeRelations()
+             ->setWheres()
+             ->setFilters()
+             ->setScopes()
+             ->setTranslations();
 
         return $this;
     }
@@ -185,18 +178,37 @@ class QueryBuilder {
     }
 
     /**
+     * NOTE: Scope is an alias for filter.
+     * The API should use the filter prefix, not scope. The word 'scope'
+     * is ambiguous with many other meanings, and should not be used.
+     * It is included here for backward compatability because the 'scope'
+     * keyword was added to the API in error.
+     *
      * Returns a function for use in setFilters array_walk
      * @return Closure function to add a filter clause.
      */
-    public function getFilterProcessor() {
-        return function($value, $parameterName) {
-            if(preg_match("/^filter/",$parameterName) > 0) {
-                $method = preg_replace('/^filter/','',$parameterName);
+    public function getFilterProcessor($prefix = 'filter') {
+        return function($value, $parameterName) use ($prefix) {
+            if(preg_match("/^$prefix/",$parameterName) > 0) {
+                $method = preg_replace("/^$prefix/",'',$parameterName);
                 $method = lcfirst($method);
-                $clause = new BuilderClause('filter',$method);
+                $clause = new BuilderClause($prefix,$method);
                 $clause->processWhere($this->builder,$parameterName,$value);
             }
         };
+    }
+
+    /**
+     * Ueses array_walk to loop through all of the filters set on this
+     * request and add filter calls to the builder.
+     * @return QueryBuilder this
+     */
+    public function setScopes() {
+        $input = $this->parser->request->all();
+
+        $fn = $this->getFilterProcessor('scope');
+        array_walk($input, $fn);
+        return $this;
     }
 
     /**

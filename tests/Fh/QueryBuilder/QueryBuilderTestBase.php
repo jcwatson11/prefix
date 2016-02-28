@@ -108,9 +108,8 @@ abstract class QueryBuilderTestBase extends TestBase {
     }
 
     public function getMockModel($strModelName = 'TestModel') {
-        $strModelPath = 'Fh\Data\Mapper\US\\';
-        if($strModelName == "TestModel") $strModelPath = "Fh\\QueryBuilder\\";
-        $strModelPath = "{$strModelPath}{$strModelName}[getConnection]";
+        $strModelPath = 'Fh\QueryBuilder';
+        $strModelPath = "{$strModelPath}\\{$strModelName}[getConnection]";
         return m::mock($strModelPath)
                  ->shouldReceive('getConnection')
                  ->andReturn($this->getMockConnection())
@@ -174,18 +173,11 @@ abstract class QueryBuilderTestBase extends TestBase {
      * @param  integer $LetterId
      * @return Fh\Data\Mapper\US\LetterMapper
      */
-    public function getMockLetter($LetterId = 1) {
-        $letter = new \Fh\Data\Mapper\US\LetterMapper();
+    public function getMockTestModel($id = 1) {
+        $model = new \Fh\QueryBuilder\TestModel();
         // Populate $letter object
-        $letter->LetterId = $LetterId;
-        $letter->StatusId = 2;
-        $letter->TemplateId = 3;
-        $letter->ChildId = '1000333222';
-        $letter->SponsorId = '10101003030';
-        $letter->OriginalMessage = 'This is an original message.';
-        $letter->EditedMessage = 'This is an edited messgae.';
-        $letter->CreatedAt = '2016-02-30 10:24:31';
-        return $letter;
+        $model->TestId = $id;
+        return $model;
     }
 }
 

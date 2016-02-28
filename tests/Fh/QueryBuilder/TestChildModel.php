@@ -5,22 +5,27 @@ namespace Fh\QueryBuilder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class TestModel extends EloquentMapperBase implements MapperInterface
+class TestRelationModel extends EloquentMapperBase implements MapperInterface
 {
     use SoftDeletes;
 
-    protected $table = 'Table';
-    protected $primaryKey = 'TestId';
+    protected $table = 'ChildTable';
+    protected $primaryKey = 'ChildId';
 
-    public function scopeByStatus($query, $StatusId) {
-        $query->where('StatusId','=',$StatusId);
+    /**
+     * Scope to test scopes
+     * @param  Illuminate\Database\Eloquent\Builder $query
+     * @return void
+     */
+    public function scopeAppropriateForPrint($query) {
+        $query->where('IncludeInPrint','=',TRUE);
     }
 
     /*
      * Eloquent relationship.
-     * hasMany photos
+     * hasOne original
      */
-    public function photos()
+    public function original()
     {
         return $this->hasMany('Fh\QueryBuilder\TestRelationModel', 'TestId', 'TestId');
     }

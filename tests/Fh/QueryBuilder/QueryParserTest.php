@@ -7,6 +7,14 @@ use Fh\QueryBuilder\QueryBuilder;
 
 class QueryParserTest extends QueryBuilderTestBase {
 
+    public function test_it_loads_default_values_from_the_config_file() {
+        // Simple non-compound URI
+        $strTestUri = '/api/v1/letters';
+        $queryParser = $this->createQueryParser($strTestUri);
+        $this->assertEquals('/api/v1/',$queryParser->strUriBase);
+        $this->assertEquals(10,$queryParser->limit);
+    }
+
     public function test_it_can_get_stripped_segments() {
         // Simple non-compound URI
         $strTestUri = '/api/v1/letters';

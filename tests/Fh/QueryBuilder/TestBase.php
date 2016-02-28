@@ -22,7 +22,7 @@ class TestBase extends TestCase {
 	protected function getApplicationProviders($app)
 	{
 		$providers = [
-			'Fh\Data\Gbo\GboServiceProvider'
+			'Fh\QueryBuilder\FhApiQueryBuilderServiceProvider'
 		];
 		return array_merge($providers,parent::getApplicationProviders($app));
 	}
@@ -49,42 +49,9 @@ class TestBase extends TestCase {
 			'prefix'    => getenv('ENTERPRISE_PREFIX'),
 		));
 		$app['config']->set('database.log', true);
+		$app['config']->set('fh-api-query-builder.limit', 10);
+		$app['config']->set('fh-api-query-builder.baseuri', '/api/v1/');
 		// $this->logListenToDbQueries();
 	}
-
-/**
- * Turns on query logging for the purposes of testing.
-	public function logListenToDbQueries()
-	{
-		// Set up logging
-		if (Config::get('database.log', false))
-		{
-			Event::listen('illuminate.query', function($query, $bindings, $time, $name)
-			{
-				$data = compact('bindings', 'time', 'name');
-
-				// Format binding data for sql insertion
-				foreach ($bindings as $i => $binding)
-				{
-					if ($binding instanceof \DateTime)
-					{
-						$bindings[$i] = $binding->format('\'Y-m-d H:i:s\'');
-					}
-					else if (is_string($binding))
-					{
-						$bindings[$i] = "'$binding'";
-					}
-				}
-
-				// Insert bindings into query
-				$query = str_replace(array('%', '?'), array('%%', '%s'), $query);
-				$query = vsprintf($query, $bindings);
-
-				Log::info($query, $data);
-			});
-		}
-	}
-*/
-
 
 }
