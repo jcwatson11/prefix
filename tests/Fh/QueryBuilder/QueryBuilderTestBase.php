@@ -9,6 +9,12 @@ use Illuminate\Database\MySqlConnection;
 
 abstract class QueryBuilderTestBase extends TestBase {
 
+    /**
+     * PHPUnit doesn't have a native way to assert that a variable
+     * is of type Closure. So we make one.
+     * @param  mixed $suspect thing to test
+     * @return void
+     */
     protected function assertIsClosure($suspect) {
         $this->assertInternalType('object',$suspect);
         $this->assertInstanceOf('Closure',$suspect);
