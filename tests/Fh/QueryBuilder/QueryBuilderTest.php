@@ -108,8 +108,8 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $queryBuilder->setWheres();
         $countBuilder = $queryBuilder->getCountBuilder();
 
-        $strSql = $queryBuilder->toSql();
-        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "FirstName" LIKE ?';
+        $strSql = $countBuilder->toSql();
+        $strExpected = 'select count(*) as count from "Table" where "Table"."deleted_at" is null and "FirstName" LIKE ?';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $queryBuilder->getBindings();
