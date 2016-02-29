@@ -125,8 +125,8 @@ use Fh\QueryBuilder\QueryBuilder;
 class RestApiController extends Controller {
 
     protected $routeMap = [
-        'organizations'          => 'Organizations',
-        'organizations.contacts' => 'Organizations.contacts'
+        'organizations'          => 'Organization',
+        'organizations.contacts' => 'Organization.contacts'
     ];
 
     public function index(Request $request) {
