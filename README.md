@@ -46,7 +46,7 @@ $> composer require fh/querybuilder
 
 ### Configuration
 
-Below is the configuration file that should be stored in your application's config/ folder as file name: fh-api-query-builder.php. Read the comments for details about each configuration variable and what it does.
+Below is the configuration file that should be stored in your application's config/ folder as file name: fh-laravel-api-query-builder.php. Read the comments for details about each configuration variable and what it does.
 
 ```php
 <?php
