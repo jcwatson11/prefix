@@ -23,7 +23,7 @@ class QueryParser {
     public function __construct(array $routeToModelMap, Request $request) {
         $this->routeMap   = $routeToModelMap;
         $this->request    = $request;
-        $this->strUriBase = config('fh-api-query-builder.baseUri');
+        $this->strUriBase = config('fh-laravel-api-query-builder.baseUri');
     }
 
     /**
@@ -32,10 +32,10 @@ class QueryParser {
      * @return int page limit
      */
     public function getLimit() {
-        $name  = config('fh-api-query-builder.limitParameterName');
+        $name  = config('fh-laravel-api-query-builder.limitParameterName');
         $limit = $this->request->get($name);
         if(!$limit) {
-            $limit = config('fh-api-query-builder.defaultLimit');
+            $limit = config('fh-laravel-api-query-builder.defaultLimit');
         }
         return $limit;
     }
@@ -46,7 +46,7 @@ class QueryParser {
      * @return int offset
      */
     public function getOffset() {
-        $name   = config('fh-api-query-builder.offsetParameterName');
+        $name   = config('fh-laravel-api-query-builder.offsetParameterName');
         $offset = $this->request->get($name);
         if(!$offset) {
             $offset = 0;
@@ -60,7 +60,7 @@ class QueryParser {
      * @return int current page
      */
     public function getPage() {
-        $name  = config('fh-api-query-builder.pageParameterName');
+        $name  = config('fh-laravel-api-query-builder.pageParameterName');
         $page  = $this->request->get($name);
         if(!$page) {
             $page = 1;

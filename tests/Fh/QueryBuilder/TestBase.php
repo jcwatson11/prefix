@@ -47,13 +47,13 @@ class TestBase extends TestCase {
 			'prefix'    => ''
 		));
 		$app['config']->set('database.log', true);
-		$app['config']->set('fh-api-query-builder.defaultLimit', 10);
-		$app['config']->set('fh-api-query-builder.baseUri', '/api/v1/');
-		$app['config']->set('fh-api-query-builder.modelNamespace', 'Fh\QueryBuilder');
-		$app['config']->set('fh-api-query-builder.pagingStyle', 'limit/offset');
-		$app['config']->set('fh-api-query-builder.offsetParameterName', 'offset');
-		$app['config']->set('fh-api-query-builder.limitParameterName', 'limit');
-		$app['config']->set('fh-api-query-builder.pageParameterName', 'page');
+		$app['config']->set('fh-laravel-api-query-builder.defaultLimit', 10);
+		$app['config']->set('fh-laravel-api-query-builder.baseUri', '/api/v1/');
+		$app['config']->set('fh-laravel-api-query-builder.modelNamespace', 'Fh\QueryBuilder');
+		$app['config']->set('fh-laravel-api-query-builder.pagingStyle', 'limit/offset');
+		$app['config']->set('fh-laravel-api-query-builder.offsetParameterName', 'offset');
+		$app['config']->set('fh-laravel-api-query-builder.limitParameterName', 'limit');
+		$app['config']->set('fh-laravel-api-query-builder.pageParameterName', 'page');
 	}
 
 }

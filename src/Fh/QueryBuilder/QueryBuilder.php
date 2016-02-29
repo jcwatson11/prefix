@@ -34,8 +34,8 @@ class QueryBuilder {
      */
     public function __construct(array $routeToModelMap, Request $request) {
         $this->parser            = new QueryParser($routeToModelMap,$request);
-        $this->strModelNamespace = config('fh-api-query-builder.modelNamespace');
-        $this->pagingStyle       = config('fh-api-query-builder.pagingStyle');
+        $this->strModelNamespace = config('fh-laravel-api-query-builder.modelNamespace');
+        $this->pagingStyle       = config('fh-laravel-api-query-builder.pagingStyle');
         $this->initializeWherePrefixes();
         $this->model             = $this->resolveModel();
         $this->builder           = $this->model->newQuery();
