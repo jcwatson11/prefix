@@ -88,6 +88,19 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $this->assertEquals($aExpected,$aBindings);
     }
 
+    public function test_it_can_decode_special_characters_in_query_string_values() {
+        $strTestUri = '/api/v1/letters?likeFullName=Jon+Watson&whereDescription=This%20is%20a%20test.';
+        $qb = $this->createQueryBuilder($strTestUri);
+        $qb->setWheres();
+        $strSql = $qb->toSql();
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "FullName" LIKE ? and "Description" = ?';
+        $this->assertEquals($strExpected,$strSql);
+
+        $aBindings = $qb->getBindings();
+        $aExpected = ['%Jon Watson%','This is a test.'];
+        $this->assertEquals($aExpected,$aBindings);
+    }
+
     public function test_it_can_include_translations_when_locale_is_set() {
         $strTestUri = '/api/v1/letters?locale=en';
 
