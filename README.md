@@ -1,4 +1,4 @@
-# FH QueryBuilder (package: fh/querybuilder)
+# FH QueryBuilder (package: fh/laravel-api-query-builder)
 
 ## A simple, unit testable translation device between an API query string and an Eloquent builder
 
