@@ -1,5 +1,5 @@
 {
-    "name": "fh/querybuilder",
+    "name": "fh/laravel-api-query-builder",
     "description": "Laravel based translation between API Standard URI's and a builder object.",
     "require": {
         "laravel/framework": "5.1.*"

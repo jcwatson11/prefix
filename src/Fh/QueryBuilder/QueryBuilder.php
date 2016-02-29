@@ -90,6 +90,7 @@ class QueryBuilder {
 
         $this->filterByParentRelation()
              ->includeRelations()
+             ->getIfSingleRecord()
              ->setWheres()
              ->setFilters()
              ->setScopes()
@@ -131,6 +132,14 @@ class QueryBuilder {
         $strRelationName = $this->parser->getRelationName();
         $builder = $this->model->where($strPrimaryKey,'=',intval($strKeyValue))->first();
         $this->builder = $builder->$strRelationName();
+        return $this;
+    }
+
+    public function getIfSingleRecord() {
+        $id = $this->parser->getResourceId();
+        if(is_null($id)) return $this;
+        $strPrimaryKey = $this->builder->getModel()->getKeyName();
+        $this->builder->where($strPrimaryKey,'=',intval($id));
         return $this;
     }
 

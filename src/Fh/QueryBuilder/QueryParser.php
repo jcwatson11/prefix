@@ -175,6 +175,12 @@ class QueryParser {
         return array_pop($aSegments);
     }
 
+    public function getResourceId() {
+        $aSegments = $this->getStrippedSegments();
+        $last = array_pop($aSegments);
+        return (is_numeric($last)) ? $last:null;
+    }
+
     /**
      * Returns the primary key number of the parent that was requested
      * @return string id of parent

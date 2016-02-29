@@ -202,4 +202,28 @@ class QueryParserTest extends QueryBuilderTestBase {
         $this->assertEquals($expected,$strRelation);
     }
 
+    public function test_it_can_find_the_resource_id_when_a_single_resource_is_requested() {
+        // No single resource requested
+        $strTestUri = '/api/v1/letters/23/photos';
+        $queryParser = $this->createQueryParser($strTestUri);
+        $this->setExpectedException('Exception');
+        $strId = $queryParser->getResourceId();
+        $this->assertNull($strRelation);
+
+        // Simple non-compound URI
+        $strTestUri = '/api/v1/letters/23';
+        $queryParser = $this->createQueryParser($strTestUri);
+        $this->setExpectedException('Exception');
+        $strId = $queryParser->getResourceId();
+        $expected = '23';
+        $this->assertEquals($expected,$strRelation);
+
+        // Double-Compound URI
+        $strTestUri = '/api/v1/letters/23/photos/4';
+        $queryParser = $this->createQueryParser($strTestUri);
+        $strId = $queryParser->getResourceId();
+        $expected = '4';
+        $this->assertEquals($expected,$strRelation);
+    }
+
 }

@@ -117,6 +117,47 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $this->assertEquals($aExpected,$aBindings);
     }
 
+    public function test_it_can_return_a_single_result_by_id() {
+        // Single record without parent
+        $strTestUri = '/api/v1/letters/23';
+        $queryBuilder = $this->createQueryBuilder($strTestUri);
+
+        $queryBuilder->build();
+
+        $strSql = $queryBuilder->toSql();
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "TestId" = ?';
+        $this->assertEquals($strExpected,$strSql);
+
+        $aBindings = $queryBuilder->getBindings();
+        $aExpected = [23];
+        $this->assertEquals($aExpected,$aBindings);
+    }
+
+    public function test_it_can_return_a_single_result_by_id_when_indicating_a_nested_relationship() {
+        $strTestUri = '/api/v1/letters/23/photos/4';
+        $queryBuilder = $this->createQueryBuilder($strTestUri);
+        $modelInstance = $this->getMockTestModel(23);
+        $mockBuilder = m::mock('stdClass')
+                 ->shouldReceive('first')
+                 ->andReturn($modelInstance)
+                 ->getMock();
+        $mockModel = m::mock('Fh\QueryBuilder\TestModel[where]')
+                 ->shouldReceive('where')
+                 ->with('TestId','=',23)
+                 ->andReturn($mockBuilder)
+                 ->getMock();
+
+        $queryBuilder->setModel($mockModel);
+
+        $queryBuilder->build();
+        $strSql = $queryBuilder->toSql();
+        $strExpected = 'select * from "ChildTable" where "ChildTable"."deleted_at" is null and "ChildTable"."TestId" = ? and "ChildTable"."TestId" is not null and "ChildId" = ?';
+        $this->assertEquals($strExpected,$strSql);
+        $aBindings = $queryBuilder->getBindings();
+        $aExpectedBindings = [23,4];
+        $this->assertEquals($aExpectedBindings,$aBindings);
+    }
+
     public function test_it_can_build_all_things_at_once() {
         $strTestUri = '/api/v1/letters/23/photos?with[]=translations&with[]=original&isnullCaption&isnotnullOriginalId&likeFirstName=Jon&filterAppropriateForPrint&lessthanTestId=2';
         $queryBuilder = $this->createQueryBuilder($strTestUri);
