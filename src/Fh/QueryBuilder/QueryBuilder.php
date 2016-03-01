@@ -12,6 +12,9 @@ class QueryBuilder {
     // Eloquent model
     protected $model;
 
+    // The query parser member variable
+    protected $parser;
+
     // Function to use when creating a new model so it can be mocked
     protected $modelCreationCallback;
 
@@ -23,6 +26,10 @@ class QueryBuilder {
 
     // Sets the paging style: either 'page=' or 'limit/offset'
     public $pagingStyle;
+
+    // Public access to builder just in case someone wants to modify it before
+    // calling paginate
+    public $builder;
 
     /**
      * Constructs the query builder
@@ -117,7 +124,7 @@ class QueryBuilder {
      */
     public function getCount() {
         $counter = $this->getCountBuilder();
-        return $count->first()->count;
+        return $counter->first()->count;
     }
 
     /**
@@ -132,6 +139,7 @@ class QueryBuilder {
         $strRelationName = $this->parser->getRelationName();
         $builder = $this->model->where($strPrimaryKey,'=',intval($strKeyValue))->first();
         $this->builder = $builder->$strRelationName();
+        $this->model = $this->builder->getModel();
         return $this;
     }
 
@@ -251,6 +259,15 @@ class QueryBuilder {
     }
 
     /**
+     * Returns the Eloquent model object instance that was
+     * used to create a new query.
+     * @return Illuminate\Database\Eloquent\Model
+     */
+    public function getModel() {
+        return $this->model;
+    }
+
+    /**
      * Allows you to set the model so it can be mocked.
      * @param Illuminate\Database\Eloquent\Model $model
      */
@@ -292,6 +309,22 @@ class QueryBuilder {
     }
 
     /**
+     * Returns the URI query parser
+     * @return Fh\QueryBuilder\QueryParserInterface
+     */
+    public function getParser() {
+        return $this->parser;
+    }
+
+    /**
+     * If you want to set a new parser of your own, do that here.
+     * @param Fh\QueryBuilder\QueryParserInterface $parser
+     */
+    public function setParser($parser) {
+        $this->parser = $parser;
+    }
+
+    /**
      * Sets the paging style so it can be mocked
      * @param string $style either 'page=' or 'limit/offset'
      */
@@ -326,7 +359,7 @@ class QueryBuilder {
         } else {
             // using limit / offset for paging
             $start = $this->parser->getOffset();
-            $this->builder->skip($start)->take($limit);
+            return $this->builder->skip($start)->limit($limit)->get();
         }
     }
 
