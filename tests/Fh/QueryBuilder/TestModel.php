@@ -23,7 +23,7 @@ class TestModel extends Model
      */
     public function photos()
     {
-        return $this->hasMany('Fh\QueryBuilder\TestRelationModel', 'TestId', 'TestId');
+        return $this->hasMany('Fh\QueryBuilder\TestChildModel', 'TestId', 'TestId');
     }
 
     /*
@@ -31,7 +31,7 @@ class TestModel extends Model
      * hasMany translations
      */
     public function translations() {
-        return $this->hasMany('Fh\QueryBuilder\TestRelationModel','TestId','TranslationId');
+        return $this->hasMany('Fh\QueryBuilder\TestChildModel','TestId','TranslationId');
     }
 
 }

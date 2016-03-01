@@ -268,6 +268,22 @@ class QueryBuilder {
     }
 
     /**
+     * Returns the target model of the collection that will actually
+     * be returned. If the current route is a nested parent/child
+     * then the child model will be returned, not the working model
+     * that the builder uses for every day use.
+     * @return Illuminate\Database\Eloquent\Model
+     */
+    public function getTargetModel() {
+        if($this->parser->hasParent()) {
+            $strRelationName = $this->parser->getRelationName();
+            return $this->getModel()->$strRelationName()->getModel();
+        } else {
+            return $this->getModel();
+        }
+    }
+
+    /**
      * Allows you to set the model so it can be mocked.
      * @param Illuminate\Database\Eloquent\Model $model
      */

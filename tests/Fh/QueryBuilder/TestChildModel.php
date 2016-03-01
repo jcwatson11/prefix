@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
-class TestRelationModel extends Model
+class TestChildModel extends Model
 {
     use SoftDeletes;
 
@@ -28,7 +28,7 @@ class TestRelationModel extends Model
      */
     public function original()
     {
-        return $this->hasMany('Fh\QueryBuilder\TestRelationModel', 'TestId', 'TestId');
+        return $this->hasMany('Fh\QueryBuilder\TestChildModel', 'TestId', 'TestId');
     }
 
     /*
@@ -36,7 +36,7 @@ class TestRelationModel extends Model
      * hasMany translations
      */
     public function translations() {
-        return $this->hasMany('Fh\QueryBuilder\TestRelationModel','TestId','TranslationId');
+        return $this->hasMany('Fh\QueryBuilder\TestChildModel','TestId','TranslationId');
     }
 
 }

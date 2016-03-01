@@ -10,9 +10,55 @@ class QueryBuilderTest extends QueryBuilderTestBase {
     public function test_it_loads_default_values_from_the_config_file() {
         // Simple non-compound URI
         $strTestUri = '/api/v1/letters';
-        $queryParser = $this->createQueryBuilder($strTestUri);
-        $this->assertEquals('Fh\QueryBuilder',$queryParser->strModelNamespace);
-        $this->assertEquals('limit/offset',$queryParser->pagingStyle);
+        $qb = $this->createQueryBuilder($strTestUri);
+        $this->assertEquals('Fh\QueryBuilder',$qb->strModelNamespace);
+        $this->assertEquals('limit/offset',$qb->pagingStyle);
+    }
+
+    public function test_it_can_resolve_the_working_model() {
+        $strTestUri = '/api/v1/letters';
+        $qb = $this->createQueryBuilder($strTestUri);
+        $model = $qb->getModel();
+        $class = get_class($model);
+        $strExpected = 'Fh\QueryBuilder\TestModel';
+        $this->assertEquals($strExpected,$class);
+
+        $strTestUri = '/api/v1/letters/23/photos';
+        $qb = $this->createQueryBuilder($strTestUri);
+        $model = $qb->getModel();
+        $class = get_class($model);
+        $strExpected = 'Fh\QueryBuilder\TestModel';
+        $this->assertEquals($strExpected,$class);
+
+        $strTestUri = '/api/v1/letters/23/photos/4/original';
+        $qb = $this->createQueryBuilder($strTestUri);
+        $model = $qb->getModel();
+        $class = get_class($model);
+        $strExpected = 'Fh\QueryBuilder\TestChildModel';
+        $this->assertEquals($strExpected,$class);
+    }
+
+    public function test_it_can_resolve_the_target_model() {
+        $strTestUri = '/api/v1/letters';
+        $qb = $this->createQueryBuilder($strTestUri);
+        $model = $qb->getTargetModel();
+        $class = get_class($model);
+        $strExpected = 'Fh\QueryBuilder\TestModel';
+        $this->assertEquals($strExpected,$class);
+
+        $strTestUri = '/api/v1/letters/23/photos';
+        $qb = $this->createQueryBuilder($strTestUri);
+        $model = $qb->getTargetModel();
+        $class = get_class($model);
+        $strExpected = 'Fh\QueryBuilder\TestChildModel';
+        $this->assertEquals($strExpected,$class);
+
+        $strTestUri = '/api/v1/letters/23/photos/4/original';
+        $qb = $this->createQueryBuilder($strTestUri);
+        $model = $qb->getTargetModel();
+        $class = get_class($model);
+        $strExpected = 'Fh\QueryBuilder\TestChildModel';
+        $this->assertEquals($strExpected,$class);
     }
 
     public function test_it_can_create_a_simple_sql_statement() {
@@ -211,10 +257,14 @@ class QueryBuilderTest extends QueryBuilderTestBase {
     public function test_it_can_paginate_results_using_limit_offset_default_settings() {
         $strTestUri = '/api/v1/letters';
         $qb = $this->createQueryBuilder($strTestUri);
-        $secondMockBuilder = m::mock('stdClass')
-                 ->shouldReceive('take')
-                 ->with(10)
+        $thirdMockBuilder = m::mock('stdClass')
+                 ->shouldReceive('get')
                  ->andReturn('')
+                 ->getMock();
+        $secondMockBuilder = m::mock('stdClass')
+                 ->shouldReceive('limit')
+                 ->with(10)
+                 ->andReturn($thirdMockBuilder)
                  ->getMock();
         $mockBuilder = m::mock('stdClass')
                  ->shouldReceive('skip')
@@ -229,10 +279,14 @@ class QueryBuilderTest extends QueryBuilderTestBase {
     public function test_it_can_paginate_results_using_limit_offset_with_parameters() {
         $strTestUri = '/api/v1/letters?limit=20&offset=40';
         $qb = $this->createQueryBuilder($strTestUri);
-        $secondMockBuilder = m::mock('stdClass')
-                 ->shouldReceive('take')
-                 ->with(20)
+        $thirdMockBuilder = m::mock('stdClass')
+                 ->shouldReceive('get')
                  ->andReturn('')
+                 ->getMock();
+        $secondMockBuilder = m::mock('stdClass')
+                 ->shouldReceive('limit')
+                 ->with(20)
+                 ->andReturn($thirdMockBuilder)
                  ->getMock();
         $mockBuilder = m::mock('stdClass')
                  ->shouldReceive('skip')
