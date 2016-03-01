@@ -175,6 +175,12 @@ class QueryParser {
         return array_pop($aSegments);
     }
 
+    /**
+     * Resturns the ID number of the last resource in the resource URI
+     * not a parent ID. This only works when the URI ends with a number.
+     *
+     * @return string last segment of the URI if it is a number
+     */
     public function getResourceId() {
         $aSegments = $this->getStrippedSegments();
         $last = array_pop($aSegments);
