@@ -226,4 +226,51 @@ class QueryParserTest extends QueryBuilderTestBase {
         $this->assertEquals($expected,$strRelation);
     }
 
+    public function test_it_can_fix_phps_auto_replacement_of_special_characters_in_key_names() {
+        $strTestUri = '/api/v1/letters?likephoto.Caption=Testing&likecontacts.FirstName=Jon';
+        $queryParser = $this->createQueryParser($strTestUri);
+
+        // First, we verify that PHP does, in fact, replace dot characters
+        // with underscores, which it does. If PHP changes in the future,
+        // this is no longer a valid test.
+        $aPHPInputs = $queryParser->request->all();
+        $aExpectedInputs = [
+            'likephoto_Caption' => 'Testing'
+            ,'likecontacts_FirstName' => 'Jon'
+        ];
+        $this->assertEquals($aExpectedInputs,$aPHPInputs);
+
+        // Next, we verify that our query parser has the ability to fix those
+        // inputs by getting the original query string and parsing it.
+        $strQueryString = $queryParser->getOriginalQueryString();
+        $strExpected = 'likecontacts.FirstName=Jon&likephoto.Caption=Testing';
+        $this->assertEquals($strExpected, $strQueryString);
+
+        $fixed = $queryParser->fixInput($strQueryString);
+        $aExpected = [
+            'likephoto.Caption'       => 'Testing'
+            ,'likecontacts.FirstName' => 'Jon'
+        ];
+        $this->assertEquals($aExpected,$fixed);
+    }
+
+    public function test_it_makes_fixed_inputs_available_during_construction() {
+        $strTestUri = '/api/v1/letters?likephoto.Caption=Testing&likecontacts.FirstName=Jon';
+        $queryParser = $this->createQueryParser($strTestUri);
+        $aExpected = [
+            'likephoto.Caption'       => 'Testing'
+            ,'likecontacts.FirstName' => 'Jon'
+        ];
+        $this->assertEquals($aExpected,$queryParser->fixedInput);
+    }
+
+    public function test_it_can_resolve_a_relation_name_from_a_compound_field_name() {
+        $strTestUri = '/api/v1/letters?likephoto.Caption=Testing';
+        $queryParser = $this->createQueryParser($strTestUri);
+        $this->setExpectedException('Exception');
+        $strId = $queryParser->getResourceId();
+        $expected = '23';
+        $this->assertEquals($expected,$strRelation);
+    }
+
 }

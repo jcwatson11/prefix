@@ -168,7 +168,7 @@ class QueryBuilder {
      * @return QueryBuilder this
      */
     public function setWheres() {
-        $input = $this->parser->request->all();
+        $input = $this->parser->fixedInput;
 
         $fn = $this->getWhereProcessor();
         array_walk($input, $fn);

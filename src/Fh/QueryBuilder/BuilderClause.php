@@ -82,7 +82,29 @@ class BuilderClause {
         $aMethodArgs = [$strField];
         if($this->strOperator) $aMethodArgs[] = $this->strOperator;
         if($values) $aMethodArgs[] = $values;
-        call_user_func_array([$builder,$this->strBuilderMethodName], $aMethodArgs);
+
+        // If the field name has a dot, then we need to join a relation
+        // and query that, not the working model.
+        if($this->fieldIndicatesRelation($strField)) {
+            list($strRelation,$strField) = explode('.',$strField);
+            $aMethodArgs[0] = $strField;
+            $fn = function($b) use ($aMethodArgs) {
+                call_user_func_array([$b,$this->strBuilderMethodName], $aMethodArgs);
+            };
+            $builder = $builder->whereHas($strRelation,$fn);
+        } else {
+            call_user_func_array([$builder,$this->strBuilderMethodName], $aMethodArgs);
+        }
+    }
+
+    /**
+     * Returns true if the field name indicates a relation to query
+     * instead of querying the working model.
+     * @param  string $strField potential field name from query string
+     * @return boolean
+     */
+    public function fieldIndicatesRelation($strField) {
+        return (strpos('.',$strField) === FALSE) ? false:true;
     }
 
     /**

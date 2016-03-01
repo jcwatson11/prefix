@@ -326,4 +326,19 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $qb->paginate();
     }
 
+    public function test_it_can_set_a_where_clause_on_a_relation() {
+        $strTestUri = '/api/v1/letters?likephotos.FirstName=Jon';
+
+        $qb = $this->createQueryBuilder($strTestUri);
+        $qb->setWheres();
+
+        $strSql = $qb->toSql();
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "photos"."FirstName" LIKE ?';
+        $this->assertEquals($strExpected,$strSql);
+
+        $aBindings = $qb->getBindings();
+        $aExpected = ['%Jon%'];
+        $this->assertEquals($aExpected,$aBindings);
+    }
+
 }

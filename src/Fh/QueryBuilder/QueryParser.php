@@ -15,6 +15,10 @@ class QueryParser {
     // Base URI to strip out to begin processing
     public $strUriBase;
 
+    // Array of query string inputs whose special characters
+    // have been restored after PHP turned them into underscores.
+    public $fixedInput;
+
     /**
      * QueryParser constructor
      * @param array   $routeToModelMap array of route.name => Model.relation pairs
@@ -23,6 +27,7 @@ class QueryParser {
     public function __construct(array $routeToModelMap, Request $request) {
         $this->routeMap   = $routeToModelMap;
         $this->request    = $request;
+        $this->fixedInput = $this->fixInput($request->server->get('QUERY_STRING'));
         $this->strUriBase = config('fh-laravel-api-query-builder.baseUri');
     }
 
@@ -199,6 +204,29 @@ class QueryParser {
             throw new \Exception("QueryBuilder Internal Error: Requested ParentId when no parent was requested.");
         }
         return $aKeys[count($aRouteNames) - 2];
+    }
+
+    public function getOriginalQueryString() {
+        return $this->request->getQueryString();
+    }
+
+    /**
+     * Fixes input field names by encoding each key name before
+     * running str_parse on them. This prevents PHP from
+     * turning dot (.) and other characters into underscores.
+     * See: http://tinyurl.com/po632un
+     * @param  string $input from $_SERVER['QUERY_STRING']
+     * @return array  of fixed inputs with special characters in their key names
+     */
+    public function fixInput($strInput) {
+        $strInput = preg_replace_callback(
+            '/(^|(?<=&))[^=[&]+/',
+            function($key) { return bin2hex(urldecode($key[0])); },
+            $strInput
+        );
+        $output = [];
+        parse_str($strInput, $output);
+        return array_combine(array_map('hex2bin', array_keys($output)), $output);
     }
 
 }
