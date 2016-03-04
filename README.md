@@ -30,7 +30,7 @@ $model->where('ParentId','=',48)
   - and all of the standard operators: =, >, <, <=, >=.
 - Supports order by and group by.
 - Supports laravel scopes.
-- Supports searching of sub-relations with relationname.FieldName=value after any prefix.
+- Supports searching of sub-relations with relationname.FieldName=value after any query prefix.
 - Supports eager loading of relationships: $model->with(...)
 - Supports multiple pagination schemas, including limit/offset, and page=X.
 - Pagination parameter names can be customized.
