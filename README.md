@@ -202,6 +202,16 @@ $builder = $l->photos()
       ->where('FirstName','LIKE','%Jon%')
       ->where('TestId','<',25)
 ```
+### Return a set of records filtered by a value in a child relation
+```http
+/api/v1/letters/23/organizations?likecontacts.FirstName=Jon
+```
+Becomes
+```php
+$builder = $organization->whereHas('contacts', function($q) {
+    $q->where('FirstName','LIKE','%Jon%');
+});
+```
 ### Return a single record by ID with some eager-loaded relations
 ```http
 /api/v1/organizations/23?with[]=contacts&with[]=notes
