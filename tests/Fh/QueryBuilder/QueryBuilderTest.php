@@ -333,7 +333,7 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $qb->setWheres();
 
         $strSql = $qb->toSql();
-        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "photos"."FirstName" LIKE ?';
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and (select count(*) from "ChildTable" where "ChildTable"."TestId" = "Table"."TestId" and "FirstName" LIKE ? and "ChildTable"."deleted_at" is null) >= 1';
         $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $qb->getBindings();

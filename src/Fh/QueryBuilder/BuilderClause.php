@@ -104,7 +104,7 @@ class BuilderClause {
      * @return boolean
      */
     public function fieldIndicatesRelation($strField) {
-        return (strpos('.',$strField) === FALSE) ? false:true;
+        return (preg_match('/\./',$strField) != 0) ? true:false;
     }
 
     /**

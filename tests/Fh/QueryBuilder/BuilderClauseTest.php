@@ -16,6 +16,19 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $this->assertIsClosure($fn);
     }
 
+    public function test_it_knows_when_a_field_name_indicates_a_relationship() {
+        $w = new BuilderClause('where','where','=');
+        $strField = 'wherephotos.Caption';
+        $bActual = $w->fieldIndicatesRelation($strField);
+        $bExpected = TRUE;
+        $this->assertEquals($bExpected,$bActual);
+
+        $strField = 'wherephotosCaption';
+        $bActual = $w->fieldIndicatesRelation($strField);
+        $bExpected = FALSE;
+        $this->assertEquals($bExpected,$bActual);
+    }
+
     public function test_it_can_properly_strip_the_prefix_out_of_a_field_name() {
         $w = new BuilderClause('inarray','whereIn');
 
