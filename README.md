@@ -40,7 +40,7 @@ $model->where('ParentId','=',48)
 
 ## Installation
 ```bash
-$> composer require fh/querybuilder
+$> composer require fh/laravel-prefix-api-querybuilder
 ```
 
 ## Usage
