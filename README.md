@@ -99,6 +99,12 @@ return [
     'pageParameterName'   => 'page'
 ];
 ```
+### Service Provider Setup
+
+Add the following service provider to your config/app.php file:
+```php
+Fh\QueryBuilder\FhApiQueryBuilderServiceProvider::class
+```
 
 ### Implementation
 
