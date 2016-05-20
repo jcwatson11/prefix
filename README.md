@@ -29,6 +29,7 @@ $model->where('ParentId','=',48)
   - NOT IN ()
   - and all of the standard operators: =, >, <, <=, >=.
 - Supports order by and group by.
+- Supports ordering a parent by a child relation as in: SELECT o.* FROM organizations o JOIN projects p ON o.OrgId = p.OrgId ORDER BY p.Date
 - Supports laravel scopes.
 - Supports searching of sub-relations with relationname.FieldName=value after any query prefix.
 - Supports eager loading of relationships: $model->with(...)
