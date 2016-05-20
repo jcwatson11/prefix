@@ -39,7 +39,8 @@ class QueryBuilder {
      * @param Model   $model   Illuminate\Database\Eloquent\Model
      * @param Request $request Illuminate\Http\Request
      */
-    public function __construct(array $routeToModelMap, Request $request) {
+    public function __construct(RestMapperInterface $restMapper, Request $request) {
+        $routeToModelMap = $restMapper->getRestMap();
         $this->parser            = new QueryParser($routeToModelMap,$request);
         $this->strModelNamespace = config('fh-laravel-api-query-builder.modelNamespace');
         $this->pagingStyle       = config('fh-laravel-api-query-builder.pagingStyle');
@@ -71,6 +72,7 @@ class QueryBuilder {
             ,'orwhere'     => new BuilderClause('orwhere','orWhere','=')
             ,'where'       => new BuilderClause('where','where','=')
             ,'orderby'     => new BuilderClause('orderby','orderBy')
+            ,'orderparentbychild'=> new OrderParentByChildBuilderClause('orderbychild')
             ,'groupby'     => new BuilderClause('groupby','groupBy')
 
             ,'between'     => new BuilderClause('between','whereBetween')
