@@ -17,6 +17,10 @@ class TestModel extends Model
         $query->where('StatusId','=',$StatusId);
     }
 
+    public function status() {
+        return $this->belongsTo('Fh\QueryBuilder\TestChildModel','TestId','TestId');
+    }
+
     /*
      * Eloquent relationship.
      * hasMany photos
