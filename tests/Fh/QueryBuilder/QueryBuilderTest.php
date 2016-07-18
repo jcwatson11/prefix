@@ -38,14 +38,16 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $this->assertEquals($strExpected,$class);
     }
 
-    public function test_it_can_resolve_the_target_model() {
+    public function test_it_can_resolve_a_simple_target_model() {
         $strTestUri = '/api/v1/letters';
         $qb = $this->createQueryBuilder($strTestUri);
         $model = $qb->getTargetModel();
         $class = get_class($model);
         $strExpected = 'Fh\QueryBuilder\TestModel';
         $this->assertEquals($strExpected,$class);
+    }
 
+    public function test_it_can_resolve_a_nested_target_model() {
         $strTestUri = '/api/v1/letters/23/photos';
         $qb = $this->createQueryBuilder($strTestUri);
         $model = $qb->getTargetModel();
@@ -53,6 +55,9 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $strExpected = 'Fh\QueryBuilder\TestChildModel';
         $this->assertEquals($strExpected,$class);
 
+    }
+
+    public function test_it_can_resolve_a_double_nested_target_model() {
         $strTestUri = '/api/v1/letters/23/photos/4/original';
         $qb = $this->createQueryBuilder($strTestUri);
         $model = $qb->getTargetModel();

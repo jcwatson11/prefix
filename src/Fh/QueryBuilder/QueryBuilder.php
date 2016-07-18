@@ -280,7 +280,9 @@ class QueryBuilder {
     public function getTargetModel() {
         if($this->parser->hasParent()) {
             $strRelationName = $this->parser->getRelationName();
-            return $this->getModel()->$strRelationName()->getModel();
+            if(method_exists($this->getModel(),strtolower($strRelationName))) {
+                return $this->getModel()->$strRelationName()->getModel();
+            } else return $this->getModel();
         } else {
             return $this->getModel();
         }
