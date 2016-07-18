@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Mockery as m;
 use Illuminate\Database\MySqlConnection;
 
-abstract class QueryBuilderTestBase extends TestBase {
+abstract class QueryBuilderTestBase extends Base {
 
     /**
      * PHPUnit doesn't have a native way to assert that a variable
@@ -163,7 +163,7 @@ abstract class QueryBuilderTestBase extends TestBase {
         $routeMap = new RouteToModelTestMap();
         $modelMap = $routeMap->getRouteToModelMap();
         $request = $this->createRequest($strUri,$aPost,$body,$files,$cookies);
-        $queryParser = new QueryParser($modelMap, $request);
+        $queryParser = new QueryParser($modelMap->getRestMap(), $request);
         return $queryParser;
     }
 

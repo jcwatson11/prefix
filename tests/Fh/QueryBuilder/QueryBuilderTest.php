@@ -61,6 +61,54 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $this->assertEquals($strExpected,$class);
     }
 
+    public function test_it_can_create_a_count_builder_for_a_simple_request() {
+        $strTestUri = '/api/v1/letters';
+        $qb = $this->createQueryBuilder($strTestUri);
+
+        $modelInstance = $this->getMockTestModel(23);
+        $mockBuilder = m::mock('stdClass')
+                 ->shouldReceive('first')
+                 ->andReturn($modelInstance)
+                 ->getMock();
+        $mockModel = m::mock('Fh\QueryBuilder\TestModel[where]')
+                 ->shouldReceive('where')
+                 ->with('TestId','=',23)
+                 ->andReturn($mockBuilder)
+                 ->getMock();
+
+        $qb->setModel($mockModel);
+
+        $qb->build();
+        $cb = $qb->getCountBuilder();
+        $sql = $cb->toSql();
+        $strExpected = 'select count(*) as count from "Table" where "Table"."deleted_at" is null';
+        $this->assertEquals($strExpected,$sql);
+    }
+
+    public function test_it_can_create_a_count_builder_for_a_nested_request() {
+        $strTestUri = '/api/v1/letters/23/photos';
+        $qb = $this->createQueryBuilder($strTestUri);
+
+        $modelInstance = $this->getMockTestModel(23);
+        $mockBuilder = m::mock('stdClass')
+                 ->shouldReceive('first')
+                 ->andReturn($modelInstance)
+                 ->getMock();
+        $mockModel = m::mock('Fh\QueryBuilder\TestModel[where]')
+                 ->shouldReceive('where')
+                 ->with('TestId','=',23)
+                 ->andReturn($mockBuilder)
+                 ->getMock();
+
+        $qb->setModel($mockModel);
+
+        $qb->build();
+        $cb = $qb->getCountBuilder();
+        $sql = $cb->toSql();
+        $strExpected = 'select count(*) as count from "ChildTable" where "ChildTable"."deleted_at" is null and "ChildTable"."TestId" = ? and "ChildTable"."TestId" is not null';
+        $this->assertEquals($strExpected,$sql);
+    }
+
     public function test_it_can_create_a_simple_sql_statement() {
         $strTestUri = '/api/v1/letters';
 

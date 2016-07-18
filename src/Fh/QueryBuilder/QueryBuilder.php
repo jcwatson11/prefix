@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Route;
 use Illuminate\Database\Connection;
+use Illuminate\Database\Query\Expression;
 
 class QueryBuilder {
 
@@ -115,7 +116,7 @@ class QueryBuilder {
      */
     public function getCountBuilder() {
         $counter = clone $this->builder->getQuery();
-        $counter->select($counter->getConnection()->raw('count(*) as count'));
+        $counter->select(new Expression('count(*) as count'));
         return $counter;
     }
 
@@ -139,8 +140,8 @@ class QueryBuilder {
         $strPrimaryKey = $this->model->getKeyName();
         $strKeyValue   = $this->parser->getParentId();
         $strRelationName = $this->parser->getRelationName();
-        $builder = $this->model->where($strPrimaryKey,'=',intval($strKeyValue))->first();
-        $this->builder = $builder->$strRelationName();
+        $record = $this->model->where($strPrimaryKey,'=',intval($strKeyValue))->first();
+        $this->builder = $record->$strRelationName();
         $this->model = $this->builder->getModel();
         return $this;
     }

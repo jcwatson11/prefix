@@ -13,6 +13,7 @@
     <testsuites>
         <testsuite name="QueryBuilder">
             <directory suffix=".php">./tests/Fh/QueryBuilder</directory>
+            <exclude>./tests/Fh/QueryBuilder/Base.php</exclude>
         </testsuite>
     </testsuites>
     <filter>

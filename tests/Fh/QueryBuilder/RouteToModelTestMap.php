@@ -2,14 +2,14 @@
 
 namespace Fh\QueryBuilder;
 
+
+
 class RouteToModelTestMap {
 
     public function getRouteToModelMap() {
-        return [
-            // route                      MapperName.relationname
-             'letters'                 => "TestModel"
-            ,'letters.photos'          => "TestModel.photos"
-            ,'letters.photos.original' => "TestChildModel.original"
-        ];
+        RestMapper::addRestMapping('letters','TestModel');
+        RestMapper::addRestMapping('letters.photos','TestModel.photos');
+        RestMapper::addRestMapping('letters.photos.original','TestChildModel.original');
+        return new RestMapper();
     }
 }

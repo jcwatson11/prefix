@@ -5,7 +5,7 @@ namespace Fh\QueryBuilder;
 use Orchestra\Testbench\TestCase;
 use Illuminate\Support\Facades\Artisan;
 
-class TestBase extends TestCase {
+class Base extends TestCase {
 
     public function setUp()
     {
