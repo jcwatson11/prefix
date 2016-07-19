@@ -39,24 +39,24 @@ class BuilderClauseTest extends QueryBuilderTestBase {
     }
 
     public function test_it_can_modify_an_array_of_values() {
-        $w = new BuilderClause('like','where','LIKE',function(&$value) {
-            $value = "%$value%";
+        $w = new BuilderClause('like','where','LIKE',function($value) {
+            return "%$value%";
         });
 
-        $aValues = ['this here','is','a','test'];
         $aExpected = ['%this here%','%is%','%a%','%test%'];
-        $w->modifyValues($aValues);
+        $aValues = ['this here','is','a','test'];
+        $aValues = $w->modifyValues($aValues);
         $this->assertEquals($aExpected,$aValues);
     }
 
     public function test_it_can_modify_a_single_value() {
-        $w = new BuilderClause('like','where','LIKE',function(&$value) {
-            $value = "%$value%";
+        $w = new BuilderClause('like','where','LIKE',function($value) {
+            return "%$value%";
         });
 
         $strValue = 'This is a test';
         $strExpected = '%This is a test%';
-        $w->modifyValues($strValue);
+        $strValue = $w->modifyValues($strValue);
         $this->assertEquals($strExpected,$strValue);
     }
 
@@ -180,8 +180,8 @@ class BuilderClauseTest extends QueryBuilderTestBase {
     }
 
     public function test_it_can_instruct_the_builder_with_a_like() {
-        $w = new BuilderClause('like','where','LIKE',function(&$value) {
-            $value = "%$value%";
+        $w = new BuilderClause('like','where','LIKE',function($value) {
+            return "%$value%";
         });
 
         $letter = new TestModel();
@@ -197,8 +197,8 @@ class BuilderClauseTest extends QueryBuilderTestBase {
     }
 
     public function test_it_can_instruct_the_builder_with_an_orlike() {
-        $w = new BuilderClause('orlike','orWhere','LIKE',function(&$value) {
-            $value = "%$value%";
+        $w = new BuilderClause('orlike','orWhere','LIKE',function($value) {
+            return "%$value%";
         });
 
         $letter = new TestModel();

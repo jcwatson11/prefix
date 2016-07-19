@@ -17,6 +17,14 @@ class BuilderClause {
     // for example, to wrap a text string in '%' as in LIKE comparisons
     protected $fnValueModifier;
 
+    // Tells the value modifier not to modify each value
+    // in an array if an array is given. Instead, the modifier
+    // is considered global, and must act on any array elements
+    // it finds for itself.
+    // By default, the modifier will be applied to each value
+    // in an array if an array value is provided.
+    protected $bWalkModifier = true;
+
     /**
      * Constructor
      * @param string $strPrefix       query string field prefix to strip out
@@ -24,11 +32,12 @@ class BuilderClause {
      * @param string $strOperator     operator to use for comparison
      * @param function $fnValueModifier modifies values as necessary
      */
-    public function __construct($strPrefix, $strMethodName, $strOperator = null, $fnValueModifier = null) {
+    public function __construct($strPrefix, $strMethodName, $strOperator = null, $fnValueModifier = null, $bWalkModifier = true) {
         $this->strPrefix            = $strPrefix;
         $this->strBuilderMethodName = $strMethodName;
         $this->strOperator          = $strOperator;
-        $this->fnValueModifier     = ($fnValueModifier) ? $fnValueModifier:$this->getDefaultValueModifier();
+        $this->fnValueModifier      = ($fnValueModifier) ? $fnValueModifier:$this->getDefaultValueModifier();
+        $this->bWalkModifier        = $bWalkModifier;
     }
 
     /**
@@ -36,7 +45,7 @@ class BuilderClause {
      * @return Closure
      */
     public function getDefaultValueModifier() {
-        return function (&$value) {
+        return function ($value) {
             return $value;
         };
     }
@@ -48,7 +57,8 @@ class BuilderClause {
      * @return string               field name for builder
      */
     public function getFieldNameFromParameter($strParamName) {
-        return preg_replace("/^{$this->strPrefix}/",'',$strParamName);
+        $value = preg_replace("/^{$this->strPrefix}|\[\]/",'',$strParamName);
+        return $value;
     }
 
     /**
@@ -60,11 +70,14 @@ class BuilderClause {
      */
     public function modifyValues(&$value) {
         $fn = $this->fnValueModifier;
-        if(is_array($value)) {
-            array_walk($value,$fn);
+        if(is_array($value) && $this->bWalkModifier) {
+            foreach($value AS $index => $v) {
+                $value[$index] = $fn($v);
+            }
+            return $value;
         } else {
             // single value, not array
-            $fn($value);
+            return $fn($value);
         }
     }
 
@@ -78,7 +91,7 @@ class BuilderClause {
      */
     public function processWhere($builder,$strParamName,$values = null) {
         $strField = $this->getFieldNameFromParameter($strParamName);
-        $this->modifyValues($values);
+        $values = $this->modifyValues($values);
         $aMethodArgs = [$strField];
         if($this->strOperator) $aMethodArgs[] = $this->strOperator;
         if($values) $aMethodArgs[] = $values;
@@ -122,7 +135,7 @@ class BuilderClause {
      * @return void
      */
     public function processFilter($builder,$strParamName,$values = null) {
-        $this->modifyValues($values);
+        $values = $this->modifyValues($values);
         $aMethodArgs = [];
         if($values) $aMethodArgs[] = $values;
         call_user_func_array([$builder,$this->strBuilderMethodName], $aMethodArgs);

@@ -67,6 +67,10 @@ class QueryBuilder {
      * @return void
      */
     public function initializeWherePrefixes() {
+        $qb = $this;
+        // TODO:
+        // Must modify array values by reference because of array_walk
+        // Options: get rid of array_walk, or modify closures
         $this->builderClauses = [
             'isnull'       => new BuilderClause('isnull','whereNull')
             ,'isnotnull'   => new BuilderClause('isnotnull','whereNotNull')
@@ -76,20 +80,32 @@ class QueryBuilder {
             ,'orderparentbychild'=> new OrderParentByChildBuilderClause('orderbychild')
             ,'groupby'     => new BuilderClause('groupby','groupBy')
 
-            ,'between'     => new BuilderClause('between','whereBetween')
-            ,'notinarray'  => new BuilderClause('notinarray','whereNotIn')
-            ,'inarray'     => new BuilderClause('inarray','whereIn')
-            ,'like'        => new BuilderClause('like','where','LIKE',function(&$value) {
-                $value = "%$value%";
-            })
-            ,'orlike'      => new BuilderClause('orlike','orWhere','LIKE',function(&$value) {
-                $value = "%$value%";
-            })
+            ,'between'     => new BuilderClause('between','whereBetween',null,$this->getValuesToArrayFunction(),false)
+            ,'notinarray'  => new BuilderClause('notinarray','whereNotIn',null,$this->getValuesToArrayFunction(),false)
+            ,'inarray'     => new BuilderClause('inarray','whereIn',null,$this->getValuesToArrayFunction(),false)
+            ,'like'        => new BuilderClause('like','where','LIKE',function($value) {
+                return "%$value%";
+            },false)
+            ,'orlike'      => new BuilderClause('orlike','orWhere','LIKE',function($value) {
+                return "%$value%";
+            },false)
             ,'greaterthan' => new BuilderClause('greaterthan','where','>')
             ,'lessthan'    => new BuilderClause('lessthan','where','<')
             ,'greaterthanorequalto' => new BuilderClause('greaterthan','where','>=')
             ,'lessthanorequalto'    => new BuilderClause('lessthan','where','<=')
         ];
+    }
+
+    /**
+     * Returns a simple value modifier function for builder
+     * clauses that expect array values.
+     * @return array
+     */
+    public function getValuesToArrayFunction() {
+        return function($value) {
+            if(is_array($value)) return $value;
+            return [$value];
+        };
     }
 
     /**
