@@ -219,6 +219,8 @@ class QueryParser {
      * @return array  of fixed inputs with special characters in their key names
      */
     public function fixInput($strInput) {
+        $strInput = preg_replace('/%5B/','[',$strInput);
+        $strInput = preg_replace('/%5D/',']',$strInput);
         $strInput = preg_replace_callback(
             '/(^|(?<=&))[^=[&]+/',
             function($key) { return bin2hex(urldecode($key[0])); },
@@ -226,7 +228,8 @@ class QueryParser {
         );
         $output = [];
         parse_str($strInput, $output);
-        return array_combine(array_map('hex2bin', array_keys($output)), $output);
+        $ret = array_combine(array_map('hex2bin', array_keys($output)), $output);
+        return $ret;
     }
 
 }

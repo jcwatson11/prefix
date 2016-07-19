@@ -394,4 +394,34 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $this->assertEquals($aExpected,$aBindings);
     }
 
+    public function test_it_can_get_records_where_value_inarray() {
+        $strTestUri = '/api/v1/letters?inarrayLetterId[]=1&inarrayLetterId[]=2';
+
+        $qb = $this->createQueryBuilder($strTestUri);
+        $qb->setWheres();
+
+        $strSql = $qb->getBuilder()->toSql();
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "LetterId" in (?, ?)';
+        $this->assertEquals($strExpected,$strSql);
+
+        $aBindings = $qb->getBindings();
+        $aExpected = [1,2];
+        $this->assertEquals($aExpected,$aBindings);
+    }
+
+    public function test_it_can_get_records_where_value_inarray_with_escaped_query_string() {
+        $strTestUri = '/api/v1/letters?inarrayLetterId%5B%5D=1&inarrayLetterId%5B%5D=2';
+
+        $qb = $this->createQueryBuilder($strTestUri);
+        $qb->setWheres();
+
+        $strSql = $qb->getBuilder()->toSql();
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "LetterId" in (?, ?)';
+        $this->assertEquals($strExpected,$strSql);
+
+        $aBindings = $qb->getBindings();
+        $aExpected = [1,2];
+        $this->assertEquals($aExpected,$aBindings);
+    }
+
 }
