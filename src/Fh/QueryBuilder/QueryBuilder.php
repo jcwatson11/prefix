@@ -370,6 +370,14 @@ class QueryBuilder {
     }
 
     /**
+     * Gets the paging style
+     * @return string $style either 'page=' or 'limit/offset'
+     */
+    public function getPagingStyle() {
+        return $this->pagingStyle;
+    }
+
+    /**
      * Setter for the total record count property
      * @param int $count
      */
