@@ -76,8 +76,8 @@ class QueryBuilder {
             ,'isnotnull'   => new BuilderClause('isnotnull','whereNotNull')
             ,'orwhere'     => new BuilderClause('orwhere','orWhere','=')
             ,'where'       => new BuilderClause('where','where','=')
+            ,'sortbychild'=> new OrderParentByChildBuilderClause('sortbychild')
             ,'orderby'     => new BuilderClause('orderby','orderBy')
-            ,'orderparentbychild'=> new OrderParentByChildBuilderClause('orderbychild')
             ,'groupby'     => new BuilderClause('groupby','groupBy')
 
             ,'between'     => new BuilderClause('between','whereBetween',null,$this->getValuesToArrayFunction(),false)

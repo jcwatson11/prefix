@@ -424,4 +424,26 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $this->assertEquals($aExpected,$aBindings);
     }
 
+    public function test_it_can_sortbychild_descending() {
+        $strTestUri = '/api/v1/letters?sortbychildstatus.ChildId';
+
+        $qb = $this->createQueryBuilder($strTestUri);
+        $qb->setWheres();
+
+        $strSql = $qb->getBuilder()->toSql();
+        $strExpected = 'select "Table".* from "Table" inner join "ChildTable" as "relTable" on "relTable"."TestId" = "Table"."TestId" where "Table"."deleted_at" is null order by "ChildTable"."ChildId" desc';
+        $this->assertEquals($strExpected,$strSql);
+    }
+
+    public function test_it_can_sortbychild_ascending() {
+        $strTestUri = '/api/v1/letters?sortbychildstatus.ChildId=asc';
+
+        $qb = $this->createQueryBuilder($strTestUri);
+        $qb->setWheres();
+
+        $strSql = $qb->getBuilder()->toSql();
+        $strExpected = 'select "Table".* from "Table" inner join "ChildTable" as "relTable" on "relTable"."TestId" = "Table"."TestId" where "Table"."deleted_at" is null order by "ChildTable"."ChildId" asc';
+        $this->assertEquals($strExpected,$strSql);
+    }
+
 }

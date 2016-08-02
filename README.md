@@ -229,6 +229,26 @@ $builder = $letter->with('contacts','notes')
                   ->where($primaryKey,'=',23);
 ```
 
+### Retrieve a list of results ordered by a certain field
+```http
+/api/v1/organizations/23?orderbyLastName
+```
+Becomes
+```php
+$builder = $letter->orderBy('LastName');
+```
+
+### Retrieve a list of results ordered by a relation field.
+```http
+/api/v1/organizations/23?sortbychildcontact.CreationDate=asc
+```
+Becomes
+```php
+$builder = $letter->join("Contact AS relTable","relTable.LetterId",'=',"Letter.LetterId")
+                  ->orderBy("Contact.CreationDate",'asc')
+                  ->select("Letter.*");
+```
+
 # Contributing
 I'm happy to consider any pull requests you want to submit. Constructive comments are also always welcome.
 
