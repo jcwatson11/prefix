@@ -41,13 +41,23 @@ class QueryBuilder {
      * @param Request $request Illuminate\Http\Request
      */
     public function __construct(RestMapperInterface $restMapper, Request $request) {
-        $routeToModelMap = $restMapper->getRestMap();
+        $this->restMapper        = $restMapper; // for cloning
+        $this->request           = $request; // for cloning
+        $routeToModelMap         = $restMapper->getRestMap();
         $this->parser            = new QueryParser($routeToModelMap,$request);
         $this->strModelNamespace = config('fh-laravel-api-query-builder.modelNamespace');
         $this->pagingStyle       = config('fh-laravel-api-query-builder.pagingStyle');
         $this->initializeWherePrefixes();
         $this->model             = $this->resolveModel();
         $this->builder           = $this->model->newQuery();
+    }
+
+    /**
+     * Sometimes we might need to completely remake the query builder.
+     * @return QueryBuilder
+     */
+    public function remake() {
+        return new static($this->restMapper,$this->request);
     }
 
     /**
@@ -126,6 +136,23 @@ class QueryBuilder {
     }
 
     /**
+     * Build the request parameters into a query builder.
+     * @return QueryBuilder this
+     */
+    public function buildForCount() {
+
+        $this->filterByParentRelation()
+             ->includeRelations()
+             ->getIfSingleRecord()
+             ->setWheres(true)
+             ->setFilters()
+             ->setScopes()
+             ->setTranslations();
+
+        return $this;
+    }
+
+    /**
      * Returns a builder clone that has been modified to select count(*)
      * instead of returning actual results.
      * @return Illuminate\Database\Eloquent\Builder
@@ -186,10 +213,10 @@ class QueryBuilder {
      * to the builder using the BuilderClause for each.
      * @return QueryBuilder this
      */
-    public function setWheres() {
+    public function setWheres($bForCount = false) {
         $input = $this->parser->fixedInput;
 
-        $fn = $this->getWhereProcessor();
+        $fn = $this->getWhereProcessor($bForCount);
         array_walk($input, $fn);
         return $this;
     }
@@ -198,10 +225,11 @@ class QueryBuilder {
      * Returns a function for use in setWheres array_walk
      * @return Closure function to add a where clause.
      */
-    public function getWhereProcessor() {
-        return function($value, $parameterName) {
+    public function getWhereProcessor($bForCount = false) {
+        return function($value, $parameterName) use ($bForCount) {
             foreach($this->builderClauses AS $prefix => $clause) {
                 if(preg_match("/^$prefix/",$parameterName) > 0) {
+                    if($bForCount && in_array($prefix,['orderby','sortbychild'])) continue;
                     $clause->processWhere($this->builder,$parameterName,$value);
                 }
             }

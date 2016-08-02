@@ -2,6 +2,16 @@
 
 namespace Fh\QueryBuilder;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphedToMany;
+use Illuminate\Database\Eloquent\Relations\MorphedByMany;
+
 class OrderParentByChildBuilderClause extends BuilderClause {
 
     // String field prefix to be strippted in order to get the field name
@@ -33,15 +43,52 @@ class OrderParentByChildBuilderClause extends BuilderClause {
 
         list($strRelation,$strField) = explode('.',$strField);
         $parentModel = $builder->getModel();
-        $relationModel = $parentModel->$strRelation();
-        $strParentTable = $parentModel->getTable();
-        $strRelatedTable = $relationModel->getModel()->getTable();
-        $strForeignKey = $relationModel->getForeignKey();
-        $strOtherKey   = $relationModel->getOtherKey();
+        $relation = $parentModel->$strRelation();
+        switch(true) {
+            case $relation instanceof HasMany:
+            case $relation instanceof HasOne:
+            case $relation instanceof MorphOne:
+            case $relation instanceof MorphMany:
+                $strParentTable = $parentModel->getTable();
+                $strRelatedTable = $relation->getModel()->getTable();
+                $strForeignKey = $relation->getForeignKey();
+                $strOtherKey   = $relation->getQualifiedParentKeyName();
+                $builder->join("$strRelatedTable","$strOtherKey", '=', "$strForeignKey")
+                    ->orderBy("$strRelatedTable.$strField",$value)
+                    ->select("$strParentTable.*");
+                break;
+            case $relation instanceof MorphTo:
+            case $relation instanceof BelongsTo:
+                $strParentTable = $parentModel->getTable();
+                $strRelatedTable = $relation->getModel()->getTable();
+                $strForeignKey = $relation->getForeignKey();
+                $strOtherKey   = $relation->getOtherKey();
+                $builder->join("$strRelatedTable AS relTable","relTable.$strOtherKey", '=', "$strParentTable.$strForeignKey")
+                    ->orderBy("relTable.$strField",$value)
+                    ->select("$strParentTable.*");
+                break;
+            case $relation instanceof BelongsToMany:
+            case $relation instanceof MorphedToMany:
+            case $relation instanceof MorphedByMany:
+                $strParentTable = $parentModel->getTable();
+                $strFarRelationTable = $relation->getRelated()->getTable();
+                $strTable = $relation->getTable();
+                $strLocalKey = explode('.',$relation->getForeignKey())[1];
+                $strForeignKey = explode('.',$relation->getOtherKey())[1];;
+                $builder->join($strTable
+                               ,"$strParentTable.$strLocalKey"
+                               ,'='
+                               ,"$strTable.$strLocalKey")
+                        ->join($strFarRelationTable
+                               ,"$strTable.$strForeignKey"
+                               ,'='
+                               ,"$strFarRelationTable.$strForeignKey")
+                        ->orderBy("$strFarRelationTable.$strField",$value);
+                break;
+            default:
+                throw new \Exception("Cannot sort by relation of type " . get_class($relation) . " yet. Fix this.");
+        }
 
-        $builder->join("$strRelatedTable AS relTable","relTable.$strOtherKey", '=', "$strParentTable.$strForeignKey")
-            ->orderBy("$strRelatedTable.$strField",$value)
-            ->select("$strParentTable.*");
 
     }
 
