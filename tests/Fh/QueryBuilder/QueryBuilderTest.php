@@ -401,8 +401,8 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $qb->setWheres();
 
         $strSql = $qb->toSql();
-        $strExpected = '/select \\* from "Table" where "Table"."deleted_at" is null and [(]select count[(]\\*[)] from "ChildTable" where "ChildTable"."TestId" = "Table"."TestId" and [(]select count[(]\\*[)] from "ChildTable" as "self_[a-zA-Z0-9]+" where "ChildTable"."deleted_at" is null and "self_[a-zA-Z0-9]+"."ChildId" = "ChildTable"."TestId" and "FirstName" LIKE \\? and "ChildTable"."deleted_at" is null[)] >= 1 and "ChildTable"."deleted_at" is null[)] >= 1/';
-        $this->assertRegexp($strExpected,$strSql);
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and (select count(*) from "ChildTable" where "ChildTable"."TestId" = "Table"."TestId" and (select count(*) from "Table" where "ChildTable"."TestId" = "Table"."TestId" and "FirstName" LIKE ? and "Table"."deleted_at" is null) >= 1 and "ChildTable"."deleted_at" is null) >= 1';
+        $this->assertEquals($strExpected,$strSql);
 
         $aBindings = $qb->getBindings();
         $aExpected = ['%Jon%'];
@@ -446,7 +446,7 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $qb->setWheres();
 
         $strSql = $qb->getBuilder()->toSql();
-        $strExpected = 'select "Table".* from "Table" inner join "ChildTable" as "relTable" on "relTable"."TestId" = "Table"."TestId" where "Table"."deleted_at" is null order by "ChildTable"."ChildId" desc';
+        $strExpected = 'select "Table".* from "Table" inner join "ChildTable" on "ChildTable"."TestId" = "Table"."TestId" where "Table"."deleted_at" is null order by "ChildTable"."ChildId" desc';
         $this->assertEquals($strExpected,$strSql);
     }
 
@@ -457,7 +457,29 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $qb->setWheres();
 
         $strSql = $qb->getBuilder()->toSql();
-        $strExpected = 'select "Table".* from "Table" inner join "ChildTable" as "relTable" on "relTable"."TestId" = "Table"."TestId" where "Table"."deleted_at" is null order by "ChildTable"."ChildId" asc';
+        $strExpected = 'select "Table".* from "Table" inner join "ChildTable" on "ChildTable"."TestId" = "Table"."TestId" where "Table"."deleted_at" is null order by "ChildTable"."ChildId" asc';
+        $this->assertEquals($strExpected,$strSql);
+    }
+
+    public function test_it_can_sortbygrandchild_descending() {
+        $strTestUri = '/api/v1/letters?sortbychildphotos.letter.ChildId';
+
+        $qb = $this->createQueryBuilder($strTestUri);
+        $qb->setWheres();
+
+        $strSql = $qb->getBuilder()->toSql();
+        $strExpected = 'select "Table".* from "Table" inner join "ChildTable" on "Table"."TestId" = "ChildTable"."TestId" inner join "Table" on "Table"."TestId" = "ChildTable"."TestId" where "Table"."deleted_at" is null order by "Table"."ChildId" desc';
+        $this->assertEquals($strExpected,$strSql);
+    }
+
+    public function test_it_can_sortbygrandchild_ascending() {
+        $strTestUri = '/api/v1/letters?sortbychildphotos.letter.ChildId=asc';
+
+        $qb = $this->createQueryBuilder($strTestUri);
+        $qb->setWheres();
+
+        $strSql = $qb->getBuilder()->toSql();
+        $strExpected = 'select "Table".* from "Table" inner join "ChildTable" on "Table"."TestId" = "ChildTable"."TestId" inner join "Table" on "Table"."TestId" = "ChildTable"."TestId" where "Table"."deleted_at" is null order by "Table"."ChildId" asc';
         $this->assertEquals($strExpected,$strSql);
     }
 

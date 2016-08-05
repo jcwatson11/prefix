@@ -131,14 +131,14 @@ class BuilderClauseTest extends QueryBuilderTestBase {
         $builder = $letter->newQuery();
         $w->processWhere($builder,'sortbychildstatus.ChildId');
         $strSql = $builder->toSql();
-        $strExpected = 'select "Table".* from "Table" inner join "ChildTable" as "relTable" on "relTable"."TestId" = "Table"."TestId" where "Table"."deleted_at" is null order by "ChildTable"."ChildId" asc';
+        $strExpected = 'select "Table".* from "Table" inner join "ChildTable" on "ChildTable"."TestId" = "Table"."TestId" where "Table"."deleted_at" is null order by "ChildTable"."ChildId" asc';
         $this->assertEquals($strExpected,$strSql);
 
         // Descending
         $builder = $letter->newQuery();
         $w->processWhere($builder,'sortbychildstatus.ChildId','desc');
         $strSql = $builder->toSql();
-        $strExpected = 'select "Table".* from "Table" inner join "ChildTable" as "relTable" on "relTable"."TestId" = "Table"."TestId" where "Table"."deleted_at" is null order by "ChildTable"."ChildId" desc';
+        $strExpected = 'select "Table".* from "Table" inner join "ChildTable" on "ChildTable"."TestId" = "Table"."TestId" where "Table"."deleted_at" is null order by "ChildTable"."ChildId" desc';
         $this->assertEquals($strExpected,$strSql);
     }
 

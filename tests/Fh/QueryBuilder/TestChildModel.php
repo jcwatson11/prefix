@@ -23,7 +23,7 @@ class TestChildModel extends Model
     }
 
     public function letter() {
-        return $this->belongsTo('Fh\QueryBuilder\TestChildModel','TestId','TestId');
+        return $this->belongsTo('Fh\QueryBuilder\TestModel','TestId','TestId');
     }
 
     /*

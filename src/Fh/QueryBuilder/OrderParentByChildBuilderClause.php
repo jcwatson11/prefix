@@ -41,9 +41,22 @@ class OrderParentByChildBuilderClause extends BuilderClause {
             throw new QueryBuilderException("Cannot order parent by child relation without indicating the relation name and its field with dot notation: relation.fieldName");
         }
 
-        list($strRelation,$strField) = explode('.',$strField);
+        $aParts = explode('.',$strField);
+        $strField = array_pop($aParts);
+        $strParentTable = $builder->getModel()->getTable();
+        $strTargetTable = '';
         $parentModel = $builder->getModel();
-        $relation = $parentModel->$strRelation();
+        while(count($aParts) > 0) {
+            $strRelation = array_shift($aParts);
+            $relation = $parentModel->$strRelation();
+            list($strTargetTable,$relation) = $this->joinRelation($builder,$parentModel,$relation);
+            $parentModel = $relation->getModel();
+        }
+        $builder->orderBy("$strTargetTable.$strField",$value)
+                ->select("$strParentTable.*");
+    }
+
+    public function joinRelation($builder,$parentModel,$relation) {
         switch(true) {
             case $relation instanceof HasMany:
             case $relation instanceof HasOne:
@@ -53,20 +66,16 @@ class OrderParentByChildBuilderClause extends BuilderClause {
                 $strRelatedTable = $relation->getModel()->getTable();
                 $strForeignKey = $relation->getForeignKey();
                 $strOtherKey   = $relation->getQualifiedParentKeyName();
-                $builder->join("$strRelatedTable","$strOtherKey", '=', "$strForeignKey")
-                    ->orderBy("$strRelatedTable.$strField",$value)
-                    ->select("$strParentTable.*");
-                break;
+                $builder->join("$strRelatedTable","$strOtherKey", '=', "$strForeignKey");
+                return [$strRelatedTable,$relation];
             case $relation instanceof MorphTo:
             case $relation instanceof BelongsTo:
                 $strParentTable = $parentModel->getTable();
                 $strRelatedTable = $relation->getModel()->getTable();
                 $strForeignKey = $relation->getForeignKey();
                 $strOtherKey   = $relation->getOtherKey();
-                $builder->join("$strRelatedTable AS relTable","relTable.$strOtherKey", '=', "$strParentTable.$strForeignKey")
-                    ->orderBy("relTable.$strField",$value)
-                    ->select("$strParentTable.*");
-                break;
+                $builder->join("$strRelatedTable","$strRelatedTable.$strOtherKey", '=', "$strParentTable.$strForeignKey");
+                return [$strRelatedTable,$relation];
             case $relation instanceof BelongsToMany:
             case $relation instanceof MorphedToMany:
             case $relation instanceof MorphedByMany:
@@ -82,14 +91,11 @@ class OrderParentByChildBuilderClause extends BuilderClause {
                         ->join($strFarRelationTable
                                ,"$strTable.$strForeignKey"
                                ,'='
-                               ,"$strFarRelationTable.$strForeignKey")
-                        ->orderBy("$strFarRelationTable.$strField",$value);
-                break;
+                               ,"$strFarRelationTable.$strForeignKey");
+                return [$strFarRelationTable,$relation];
             default:
                 throw new \Exception("Cannot sort by relation of type " . get_class($relation) . " yet. Fix this.");
         }
-
-
     }
 
 }
