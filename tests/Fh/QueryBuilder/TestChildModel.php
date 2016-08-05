@@ -22,6 +22,10 @@ class TestChildModel extends Model
         $query->where('IncludeInPrint','=',TRUE);
     }
 
+    public function letter() {
+        return $this->belongsTo('Fh\QueryBuilder\TestChildModel','TestId','TestId');
+    }
+
     /*
      * Eloquent relationship.
      * hasOne original

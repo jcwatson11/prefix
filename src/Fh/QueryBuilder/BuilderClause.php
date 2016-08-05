@@ -99,8 +99,9 @@ class BuilderClause {
         // If the field name has a dot, then we need to join a relation
         // and query that, not the working model.
         if($this->fieldIndicatesRelation($strField)) {
-            list($strRelation,$strField) = explode('.',$strField);
-            $aMethodArgs[0] = $strField;
+            $aParts = explode('.',$strField);
+            $aMethodArgs[0] = array_pop($aParts);
+            $strRelation = implode('.',$aParts);
             $fn = function($b) use ($aMethodArgs) {
                 call_user_func_array([$b,$this->strBuilderMethodName], $aMethodArgs);
             };

@@ -394,6 +394,21 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $this->assertEquals($aExpected,$aBindings);
     }
 
+    public function test_it_can_set_a_where_clause_on_a_grandchild_relation() {
+        $strTestUri = '/api/v1/letters?likephotos.letter.FirstName=Jon';
+
+        $qb = $this->createQueryBuilder($strTestUri);
+        $qb->setWheres();
+
+        $strSql = $qb->toSql();
+        $strExpected = '/select \\* from "Table" where "Table"."deleted_at" is null and [(]select count[(]\\*[)] from "ChildTable" where "ChildTable"."TestId" = "Table"."TestId" and [(]select count[(]\\*[)] from "ChildTable" as "self_[a-zA-Z0-9]+" where "ChildTable"."deleted_at" is null and "self_[a-zA-Z0-9]+"."ChildId" = "ChildTable"."TestId" and "FirstName" LIKE \\? and "ChildTable"."deleted_at" is null[)] >= 1 and "ChildTable"."deleted_at" is null[)] >= 1/';
+        $this->assertRegexp($strExpected,$strSql);
+
+        $aBindings = $qb->getBindings();
+        $aExpected = ['%Jon%'];
+        $this->assertEquals($aExpected,$aBindings);
+    }
+
     public function test_it_can_get_records_where_value_inarray() {
         $strTestUri = '/api/v1/letters?inarrayLetterId[]=1&inarrayLetterId[]=2';
 
