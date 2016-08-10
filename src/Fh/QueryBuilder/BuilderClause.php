@@ -89,12 +89,17 @@ class BuilderClause {
      * @param  mixed $values        string or array of string
      * @return void
      */
-    public function processWhere($builder,$strParamName,$values = null) {
+    public function processWhere($builder,$strParamName,$values = null,$locale = null) {
         $strField = $this->getFieldNameFromParameter($strParamName);
         $values = $this->modifyValues($values);
         $aMethodArgs = [$strField];
         if($this->strOperator) $aMethodArgs[] = $this->strOperator;
         if($values) $aMethodArgs[] = $values;
+        $bTranslate = false;
+        if($this->modelIsTranslatable($builder) && $builder->getModel()->isTranslationAttribute($strField)) {
+            $strField = "Translations.$strField";
+            $bTranslate = true;
+        }
 
         // If the field name has a dot, then we need to join a relation
         // and query that, not the working model.
@@ -102,12 +107,16 @@ class BuilderClause {
             $aParts = explode('.',$strField);
             $aMethodArgs[0] = array_pop($aParts);
             $strRelation = implode('.',$aParts);
-            $fn = function($b) use ($aMethodArgs) {
+            $fn = function($b) use ($aMethodArgs,$bTranslate,$locale) {
                 call_user_func_array([$b,$this->strBuilderMethodName], $aMethodArgs);
+                if($bTranslate) {
+                    $b->where('Locale','=',$locale);
+                }
             };
             $builder = $builder->whereHas($strRelation,$fn);
         } else {
-            call_user_func_array([$builder,$this->strBuilderMethodName], $aMethodArgs);
+            $strMethod = $this->strBuilderMethodName;
+            call_user_func_array([$builder,$strMethod], $aMethodArgs);
         }
     }
 
@@ -159,5 +168,26 @@ class BuilderClause {
     public function processScope($builder,$strParamName,$values = null) {
         $this->processFilter($builder,$strParamName,$values);
     }
+
+    /**
+     * Returns true if the model uses the translatable trait.
+     * False otherwise.
+     * @return boolean
+     */
+    public function modelIsTranslatable($builder) {
+        $modelClass = get_class($builder->getModel());
+        $reflector = new \ReflectionClass($modelClass);
+        $traitNames = [];
+        $recursiveClasses = function ($class) use(&$recursiveClasses, &$traitNames) {
+            $traitNames = array_merge($traitNames, $class->getTraitNames());
+            if ($class->getParentClass() != false) {
+                $reflection = $class->getParentClass();
+                $recursiveClasses($reflection);
+            }
+        };
+        $recursiveClasses($reflector);
+        return in_array('Dimsav\Translatable\Translatable',$traitNames);
+    }
+
 
 }

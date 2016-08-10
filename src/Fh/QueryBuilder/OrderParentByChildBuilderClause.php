@@ -33,7 +33,7 @@ class OrderParentByChildBuilderClause extends BuilderClause {
      * @param  mixed $values        string or array of string
      * @return void
      */
-    public function processWhere($builder,$strParamName,$value = 'asc') {
+    public function processWhere($builder,$strParamName,$value = 'asc',$locale = null) {
         $strField = $this->getFieldNameFromParameter($strParamName);
 
         // The given values are child relations with their respective field names.

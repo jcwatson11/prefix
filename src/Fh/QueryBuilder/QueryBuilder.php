@@ -32,6 +32,9 @@ class QueryBuilder {
     // calling paginate
     public $builder;
 
+    // Locale code for translated attributes.
+    protected $locale;
+
     /**
      * Constructs the query builder
      * @param array   $routeToModelMap Mapping of route segment names
@@ -129,8 +132,7 @@ class QueryBuilder {
              ->getIfSingleRecord()
              ->setWheres()
              ->setFilters()
-             ->setScopes()
-             ->setTranslations();
+             ->setScopes();
 
         return $this;
     }
@@ -146,8 +148,7 @@ class QueryBuilder {
              ->getIfSingleRecord()
              ->setWheres(true)
              ->setFilters()
-             ->setScopes()
-             ->setTranslations();
+             ->setScopes();
 
         return $this;
     }
@@ -230,7 +231,7 @@ class QueryBuilder {
             foreach($this->builderClauses AS $prefix => $clause) {
                 if(preg_match("/^$prefix/",$parameterName) > 0) {
                     if($bForCount && in_array($prefix,['orderby','sortbychild'])) continue;
-                    $clause->processWhere($this->builder,$parameterName,$value);
+                    $clause->processWhere($this->builder,$parameterName,$value,$this->getLocale());
                 }
             }
         };
@@ -265,7 +266,7 @@ class QueryBuilder {
                 $method = preg_replace("/^$prefix/",'',$parameterName);
                 $method = lcfirst($method);
                 $clause = new BuilderClause($prefix,$method);
-                $clause->processWhere($this->builder,$parameterName,$value);
+                $clause->processWhere($this->builder,$parameterName,$value,$this->getLocale());
             }
         };
     }
@@ -280,19 +281,6 @@ class QueryBuilder {
 
         $fn = $this->getFilterProcessor('scope');
         array_walk($input, $fn);
-        return $this;
-    }
-
-    /**
-     * Load translations if the locale is set.
-     * @return QueryBuilder this
-     */
-    public function setTranslations() {
-        $locale = $this->parser->request->get('locale');
-
-        if($locale) {
-            $this->builder->with('translations');
-        }
         return $this;
     }
 
@@ -434,6 +422,22 @@ class QueryBuilder {
             $start = $this->parser->getOffset();
             return $this->builder->skip($start)->limit($limit)->get();
         }
+    }
+
+    /**
+     * Setter for locale
+     * @param string $locale code
+     */
+    public function setLocale($locale) {
+        $this->locale = $locale;
+    }
+
+    /**
+     * Getter for locale
+     * @return string locale code
+     */
+    public function getLocale() {
+        return $this->locale;
     }
 
 }
