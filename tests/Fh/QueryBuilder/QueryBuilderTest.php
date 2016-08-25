@@ -200,19 +200,6 @@ class QueryBuilderTest extends QueryBuilderTestBase {
         $this->assertEquals($aExpected,$aBindings);
     }
 
-    public function test_it_can_include_translations_when_locale_is_set() {
-        $strTestUri = '/api/v1/letters?locale=en';
-
-        $qb = $this->createQueryBuilder($strTestUri);
-        $qb->setTranslations();
-        $eagerLoads = $qb->getBuilder()->getEagerLoads();
-        $this->assertEquals(['translations'],array_keys($eagerLoads));
-
-        $strSql = $qb->toSql();
-        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null';
-        $this->assertEquals($strExpected,$strSql);
-    }
-
     public function test_it_can_get_a_record_count_for_all_records() {
         $strTestUri = '/api/v1/letters?likeFirstName=Jon';
 
@@ -480,6 +467,28 @@ class QueryBuilderTest extends QueryBuilderTestBase {
 
         $strSql = $qb->getBuilder()->toSql();
         $strExpected = 'select "Table".* from "Table" inner join "ChildTable" on "Table"."TestId" = "ChildTable"."TestId" inner join "Table" on "Table"."TestId" = "ChildTable"."TestId" where "Table"."deleted_at" is null order by "Table"."ChildId" asc';
+        $this->assertEquals($strExpected,$strSql);
+    }
+
+    public function test_it_can_include_trashed_items() {
+        $strTestUri = '/api/v1/letters?withTrashed=1';
+
+        $qb = $this->createQueryBuilder($strTestUri);
+        $qb->build();
+
+        $strSql = $qb->getBuilder()->toSql();
+        $strExpected = 'select * from "Table"';
+        $this->assertEquals($strExpected,$strSql);
+    }
+
+    public function test_it_can_get_only_trashed_items() {
+        $strTestUri = '/api/v1/letters?onlyTrashed=1';
+
+        $qb = $this->createQueryBuilder($strTestUri);
+        $qb->build();
+
+        $strSql = $qb->getBuilder()->toSql();
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is not null';
         $this->assertEquals($strExpected,$strSql);
     }
 
