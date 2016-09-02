@@ -128,6 +128,8 @@ class QueryBuilder {
     public function build() {
 
         $this->filterByParentRelation()
+             ->withTrashed()
+             ->onlyTrashed()
              ->includeRelations()
              ->getIfSingleRecord()
              ->setWheres()
@@ -144,6 +146,8 @@ class QueryBuilder {
     public function buildForCount() {
 
         $this->filterByParentRelation()
+             ->withTrashed()
+             ->onlyTrashed()
              ->includeRelations()
              ->getIfSingleRecord()
              ->setWheres(true)
@@ -205,6 +209,30 @@ class QueryBuilder {
     public function includeRelations() {
         if($with = $this->parser->request->get('with')) {
             $this->builder->with($with);
+        }
+        return $this;
+    }
+
+    /**
+     * When withTrashed=1 is on the query string,
+     * soft-deleted models will be included.
+     * @return QueryBuilder this
+     */
+    public function withTrashed() {
+        if('1' == $this->parser->request->get('withTrashed')) {
+            $this->builder->withTrashed();
+        }
+        return $this;
+    }
+
+    /**
+     * When onlyTrashed=1 is on the query string, only
+     * soft-deleted models will be returned.
+     * @return QueryBuilder this
+     */
+    public function onlyTrashed() {
+        if('1' == $this->parser->request->get('onlyTrashed')) {
+            $this->builder->onlyTrashed();
         }
         return $this;
     }
