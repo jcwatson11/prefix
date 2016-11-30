@@ -82,6 +82,22 @@ class BuilderClause {
     }
 
     /**
+     * Returns the mapped field name instead of the unmapped
+     * if the model supports mapping.
+     * @param  QueryBuilder $builder
+     * @param  string       $strField
+     * @return string       mapped field name, or $strField if no mapping was available
+     */
+    public function getMappedField($builder, $strField) {
+        $model = $builder->getModel();
+        if(method_exists($model,'getPropertyMap')) {
+            $map = $model->getPropertyMap();
+            return (@$map[$strField]) ? $map[$strField]:$strField;
+        }
+        return $strField;
+    }
+
+    /**
      * Call the builder method with its proper parameters to limit
      * the builder query as instructed.
      * @param  Illuminate\Database\Eloquent\Builder $builder
@@ -91,6 +107,7 @@ class BuilderClause {
      */
     public function processWhere($builder,$strParamName,$values = null,$locale = null) {
         $strField = $this->getFieldNameFromParameter($strParamName);
+        $strField = $this->getMappedField($builder,$strField);
         $values = $this->modifyValues($values);
         $aMethodArgs = [$strField];
         if($this->strOperator) $aMethodArgs[] = $this->strOperator;
