@@ -126,7 +126,7 @@ class BuilderClause {
             $strRelation = implode('.',$aParts);
             $fn = function($b) use ($aMethodArgs,$bTranslate,$locale) {
                 call_user_func_array([$b,$this->strBuilderMethodName], $aMethodArgs);
-                if($bTranslate) {
+                if($bTranslate && $locale) {
                     $b->where('Locale','=',$locale);
                 }
             };
