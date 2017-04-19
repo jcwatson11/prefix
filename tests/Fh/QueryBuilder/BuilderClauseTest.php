@@ -234,11 +234,26 @@ class BuilderClauseTest extends QueryBuilderTestBase {
     }
 
     public function test_it_can_instruct_the_builder_with_a_greaterthan() {
-        $w = new BuilderClause('greaterthan','where','>=');
+        $w = new BuilderClause('greaterthan','where','>');
 
         $letter = new TestModel();
         $builder = $letter->newQuery();
         $w->processWhere($builder,'greaterthanLetterId',9);
+        $strSql = $builder->toSql();
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "LetterId" > ?';
+        $this->assertEquals($strExpected,$strSql);
+
+        $aBindings = $builder->getBindings();
+        $aExpected = [9];
+        $this->assertEquals($aExpected,$aBindings);
+    }
+
+    public function test_it_can_instruct_the_builder_with_a_greaterthanorequalto() {
+        $w = new BuilderClause('greaterthanorequalto','where','>=');
+
+        $letter = new TestModel();
+        $builder = $letter->newQuery();
+        $w->processWhere($builder,'greaterthanorequaltoLetterId',9);
         $strSql = $builder->toSql();
         $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "LetterId" >= ?';
         $this->assertEquals($strExpected,$strSql);
@@ -249,11 +264,26 @@ class BuilderClauseTest extends QueryBuilderTestBase {
     }
 
     public function test_it_can_instruct_the_builder_with_a_lessthan() {
-        $w = new BuilderClause('lessthan','where','<=');
+        $w = new BuilderClause('lessthan','where','<');
 
         $letter = new TestModel();
         $builder = $letter->newQuery();
         $w->processWhere($builder,'lessthanLetterId',9);
+        $strSql = $builder->toSql();
+        $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "LetterId" < ?';
+        $this->assertEquals($strExpected,$strSql);
+
+        $aBindings = $builder->getBindings();
+        $aExpected = [9];
+        $this->assertEquals($aExpected,$aBindings);
+    }
+
+    public function test_it_can_instruct_the_builder_with_a_lessthanorequalto() {
+        $w = new BuilderClause('lessthanorequalto','where','<=');
+
+        $letter = new TestModel();
+        $builder = $letter->newQuery();
+        $w->processWhere($builder,'lessthanorequaltoLetterId',9);
         $strSql = $builder->toSql();
         $strExpected = 'select * from "Table" where "Table"."deleted_at" is null and "LetterId" <= ?';
         $this->assertEquals($strExpected,$strSql);
